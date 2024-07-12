@@ -1,0 +1,4 @@
+.gss-admin .col-sm-6 .m-0 {
+    padding-left: calc(var(--bs-gutter-x)* .5);
+    padding-right: calc(var(--bs-gutter-x)* .5);
+}

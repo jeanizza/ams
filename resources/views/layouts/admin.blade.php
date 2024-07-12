@@ -9,9 +9,18 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/adminlte.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <style>
+        .navbar-nav .nav-link {
+            margin-right: 15px;
+        }
+        .user-name {
+            margin-right: 20px;
+        }
+    </style>
 </head>
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini gss-admin">
     <div id="app" class="wrapper">
         <!-- Navbar -->
         @include('gss.admin.partials.navbar')

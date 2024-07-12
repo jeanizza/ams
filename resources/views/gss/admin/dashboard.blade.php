@@ -1,10 +1,10 @@
 @extends('layouts.admin')
 
 @section('title', 'GSS Admin Dashboard')
-@section('page-title', 'GSS Admin Dashboard')
+<div class="gss-title">@section('page-title', 'GSS Admin Dashboard')</div>
 
 @section('content')
-<div class="container">
+<div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
