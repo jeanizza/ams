@@ -1,29 +1,74 @@
+<!-- resources/views/gss/admin/partials/sidebar.blade.php -->
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <!-- Brand Logo -->
-    <a href="#" class="brand-link">
-        <span class="brand-text font-weight-light">AdminLTE 3</span>
+    <a href="{{ route('gss.admin.dashboard') }}" class="brand-link">
+        <span class="brand-text font-weight-light">GSS Admin</span>
     </a>
 
-    <!-- Sidebar -->
     <div class="sidebar">
-        <!-- Sidebar user panel (optional) -->
-        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <div class="info">
-                <a href="#" class="d-block">Admin</a>
-            </div>
-        </div>
-
-        <!-- Sidebar Menu -->
         <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <!-- Add icons to the links using the .nav-icon class
+                     with font-awesome or any other icon font library -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{ route('gss.admin.dashboard') }}" class="nav-link">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-cogs"></i>
+                        <p>
+                            Serviceable
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('gss.admin.par') }}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>PAR</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gss.admin.ics') }}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>ICS</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gss.admin.ptr') }}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>PTR</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gss.admin.itr') }}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>ITR</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('gss.admin.unserviceable') }}" class="nav-link">
+                        <i class="nav-icon fas fa-times-circle"></i>
+                        <p>Unserviceable</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('gss.admin.maintenance_ledger') }}" class="nav-link">
+                        <i class="nav-icon fas fa-wrench"></i>
+                        <p>Maintenance Ledger</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('gss.admin.reconciliation') }}" class="nav-link">
+                        <i class="nav-icon fas fa-balance-scale"></i>
+                        <p>Reconciliation</p>
                     </a>
                 </li>
             </ul>
         </nav>
     </div>
-    <!-- /.sidebar -->
 </aside>

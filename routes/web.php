@@ -41,6 +41,19 @@ Route::middleware(['auth', PreventBackHistory::class, CheckRoleAndOffice::class 
 // Routes for General Services Admin
 Route::middleware(['auth', PreventBackHistory::class, CheckRoleAndOffice::class . ':admin,general services section'])->group(function () {
     Route::get('/gss/admin/dashboard', [App\Http\Controllers\GssAdminController::class, 'index'])->name('gss.admin.dashboard');
+
+    // Serviceable routes with sub-menu
+    Route::prefix('gss/admin/serviceable')->group(function () {
+        Route::get('/par', [App\Http\Controllers\GssAdminController::class, 'par'])->name('gss.admin.par');
+        Route::get('/ics', [App\Http\Controllers\GssAdminController::class, 'ics'])->name('gss.admin.ics');
+        Route::get('/ptr', [App\Http\Controllers\GssAdminController::class, 'ptr'])->name('gss.admin.ptr');
+        Route::get('/itr', [App\Http\Controllers\GssAdminController::class, 'itr'])->name('gss.admin.itr');
+    });
+
+    // Other routes
+    Route::get('/unserviceable', [App\Http\Controllers\GssAdminController::class, 'unserviceable'])->name('gss.admin.unserviceable');
+    Route::get('/maintenance_ledger', [App\Http\Controllers\GssAdminController::class, 'maintenanceLedger'])->name('gss.admin.maintenance_ledger');
+    Route::get('/reconciliation', [App\Http\Controllers\GssAdminController::class, 'reconciliation'])->name('gss.admin.reconciliation');
 });
 
 // Routes for General Services User
