@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\CheckRoleAndOffice;
 use App\Http\Middleware\PreventBackHistory;
-
+use App\Http\Controllers\GssAdminController;
+use App\Http\Controllers\UserController;
 
 Auth::routes();
 
@@ -44,16 +45,19 @@ Route::middleware(['auth', PreventBackHistory::class, CheckRoleAndOffice::class 
 
     // Serviceable routes with sub-menu
     Route::prefix('gss/admin/serviceable')->group(function () {
-        Route::get('/par', [App\Http\Controllers\GssAdminController::class, 'par'])->name('gss.admin.par');
-        Route::get('/ics', [App\Http\Controllers\GssAdminController::class, 'ics'])->name('gss.admin.ics');
-        Route::get('/ptr', [App\Http\Controllers\GssAdminController::class, 'ptr'])->name('gss.admin.ptr');
-        Route::get('/itr', [App\Http\Controllers\GssAdminController::class, 'itr'])->name('gss.admin.itr');
+        Route::get('/add-record', [GssAdminController::class, 'add_record'])->name('gss.admin.add_record');
+        Route::get('/transfer-property', [GssAdminController::class, 'transfer_property'])->name('gss.admin.transfer_property');
     });
 
+    // Add this route to handle the form submission
+    Route::post('/gss/admin/add-record', [GssAdminController::class, 'storeAddRecord'])->name('gss.admin.store_add_record');
+
+    Route::get('/sections/{div_id}', [GssAdminController::class, 'getSections'])->name('gss.admin.get_sections');
+
     // Other routes
-    Route::get('/unserviceable', [App\Http\Controllers\GssAdminController::class, 'unserviceable'])->name('gss.admin.unserviceable');
-    Route::get('/maintenance_ledger', [App\Http\Controllers\GssAdminController::class, 'maintenanceLedger'])->name('gss.admin.maintenance_ledger');
-    Route::get('/reconciliation', [App\Http\Controllers\GssAdminController::class, 'reconciliation'])->name('gss.admin.reconciliation');
+    Route::get('/unserviceable', [GssAdminController::class, 'unserviceable'])->name('gss.admin.unserviceable');
+    Route::get('/maintenance_ledger', [GssAdminController::class, 'maintenanceLedger'])->name('gss.admin.maintenance_ledger');
+    Route::get('/reconciliation', [GssAdminController::class, 'reconciliation'])->name('gss.admin.reconciliation');
 });
 
 // Routes for General Services User

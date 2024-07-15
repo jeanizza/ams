@@ -11,11 +11,9 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    protected $table = 'users'; // Ensure this matches your table name
+    protected $primaryKey = 'users_id'; // Ensure this matches your primary key
+
     protected $fillable = [
         'name',
         'username',
@@ -45,5 +43,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Define the relationship with AddRecord
+    public function addRecords()
+    {
+        return $this->hasMany(AddRecord::class, 'name', 'users_id');
     }
 }

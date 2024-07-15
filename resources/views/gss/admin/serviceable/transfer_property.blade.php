@@ -1,16 +1,16 @@
 @extends('layouts.admin')
 
-@section('title', 'Serviceable - ICS')
-@section('page-title', 'Serviceable - ICS')
+@section('title', 'Transfer Property')
+@section('page-title', 'Transfer Property')
 
 @section('content')
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">ICS</div>
+                <div class="card-header">Transfer Property</div>
                 <div class="card-body">
-                    <!-- ICS content goes here -->
+                    <!-- Transfer Property content goes here -->
                 </div>
             </div>
         </div>

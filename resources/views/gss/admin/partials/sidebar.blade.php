@@ -22,30 +22,18 @@
                             Serviceable
                             <i class="right fas fa-angle-left"></i>
                         </p>
-                    </a>
+                    </a>  
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('gss.admin.par') }}" class="nav-link">
+                            <a href="{{ route('gss.admin.add_record') }}" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>PAR</p>
+                                <p>Add Record</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('gss.admin.ics') }}" class="nav-link">
+                            <a href="{{ route('gss.admin.transfer_property') }}" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>ICS</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('gss.admin.ptr') }}" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>PTR</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('gss.admin.itr') }}" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>ITR</p>
+                                <p>Transfer Property</p>
                             </a>
                         </li>
                     </ul>

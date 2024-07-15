@@ -1,4 +1,4 @@
-<!-- resources/views/gss/admin/partials/navbar.blade.php -->
+<!-- resources/views/user/partials/navbar.blade.php -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
