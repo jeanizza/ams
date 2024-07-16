@@ -29,11 +29,11 @@ class AddRecord extends Model
          return $this->belongsTo(Section::class, 'sec_id');
      }
  
-     // Relationship to User (uploaded_by)
-     public function uploadedBy()
-     {
-         return $this->belongsTo(User::class, 'name', 'users_id');
-     }
+    // Relationship to User (uploaded_by)
+    public function uploadedBy()
+    {
+        return $this->belongsTo(User::class, 'name', 'uploaded_by');
+    }
 
    
 }

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Division;
 use App\Models\Section;
 use App\Models\AddRecord;
+use Carbon\Carbon;
 
 class GssAdminController extends Controller
 {
@@ -36,39 +37,44 @@ class GssAdminController extends Controller
                 'property_number' => 'required|string',
                 'category' => 'required|string',
                 'particular' => 'required|string',
-                'description' => 'required|string',
-                'brand' => 'required|string',
-                'model' => 'required|string',
-                'serial_no' => 'required|string',
-                'amount' => 'required|numeric',
+                'description' => 'required|string|max:300',
+                'brand' => 'required|string|max:50',
+                'model' => 'required|string|max:50',
+                'serial_no' => 'required|string|max:50',
+                'amount' => 'required|numeric|between:0,9999999999.99',
                 'date_acquired' => 'required|date',
-                'po_number' => 'required|string',
-                'end_user' => 'required|string',
-                'position' => 'required|string',
+                'po_number' => 'required|string|max:20',
+                'end_user' => 'required|string|max:150',
+                'position' => 'required|string|max:150',
                 'division' => 'required|exists:division_pits,div_id',
                 'section' => 'required|exists:section,sec_id',
-                'actual_user' => 'required|string',
-                'position_actual_user' => 'required|string',
-                'status' => 'required|string',
-                'fund' => 'required|string',
-                'lifespan' => 'required|integer',
+                'actual_user' => 'required|string|max:150',
+                'position_actual_user' => 'required|string|max:150',
+                'remarks' => 'required|string|max:150',
+                'fund' => 'required|string|max:20',
+                'lifespan' => 'required|integer|min:1',
                 'upload_image' => 'required|image|mimes:jpeg,png|max:2048',
             ]);
 
-            $validatedData['division_id'] = $request->division;
-            $validatedData['section_id'] = $request->section;
-            $validatedData['uploaded_by'] = Auth::users_id();
+             // Assign additional fields
+            $validatedData['div_id'] = $request->division;
+            $validatedData['sec_id'] = $request->section;
+            $validatedData['uploaded_by'] = Auth::user()->name; // Save the name of the logged-in user
             $validatedData['date_created'] = now();
-            $validatedData['date_renewed'] = \Carbon\Carbon::parse($validatedData['date_acquired'])->addYears($validatedData['lifespan']);
+            $validatedData['date_renewed'] = Carbon::parse($validatedData['date_acquired'])->addMonths((int)$validatedData['lifespan']);
 
+            // Handle file upload
             if ($request->hasFile('upload_image')) {
                 $validatedData['upload_image'] = $request->file('upload_image')->store('uploads', 'public');
             }
 
+            // Create the record
             AddRecord::create($validatedData);
 
+            // Redirect with success message
             return redirect()->route('gss.admin.add_record')->with('success', 'Record added successfully');
         }
+
 
     public function transfer_property()
     {

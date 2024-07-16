@@ -51,8 +51,7 @@ Route::middleware(['auth', PreventBackHistory::class, CheckRoleAndOffice::class 
 
     // Add this route to handle the form submission
     Route::post('/gss/admin/add-record', [GssAdminController::class, 'storeAddRecord'])->name('gss.admin.store_add_record');
-
-    Route::get('/sections/{div_id}', [GssAdminController::class, 'getSections'])->name('gss.admin.get_sections');
+    Route::get('/gss/admin/get-sections/{div_id}', [GssAdminController::class, 'getSections'])->name('gss.admin.get_sections');
 
     // Other routes
     Route::get('/unserviceable', [GssAdminController::class, 'unserviceable'])->name('gss.admin.unserviceable');

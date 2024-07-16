@@ -20,13 +20,13 @@
                                 <option value="ICS">Inventory Custodian Slip</option>
                             </select>
                         </div>
-                        
+
                         <!-- Property Number -->
                         <div class="form-group">
                             <label for="property_number">Property Number</label>
                             <input type="text" class="form-control" id="property_number" name="property_number" required>
                         </div>
-                        
+
                         <!-- Category -->
                         <div class="form-group">
                             <label for="category">Category</label>
@@ -47,66 +47,66 @@
                             </select>
                         </div>
 
-                        <!-- particular -->
+                        <!-- Particular -->
                         <div class="form-group">
                             <label for="particular">Particular</label>
                             <input type="text" class="form-control" id="particular" name="particular" required>
                         </div>
 
-                          <!-- description -->
-                          <div class="form-group">
+                        <!-- Description -->
+                        <div class="form-group">
                             <label for="description">Description</label>
-                            <input type="text" class="form-control" id="description" name="description" required>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
                         </div>
 
-                        <!-- brand -->
+                        <!-- Brand -->
                         <div class="form-group">
                             <label for="brand">Brand</label>
                             <input type="text" class="form-control" id="brand" name="brand" required>
                         </div>
 
-                        <!-- model -->
+                        <!-- Model -->
                         <div class="form-group">
                             <label for="model">Model</label>
                             <input type="text" class="form-control" id="model" name="model" required>
                         </div>
 
-                        <!-- serial_no -->
+                        <!-- Serial Number -->
                         <div class="form-group">
                             <label for="serial_no">Serial No.</label>
                             <input type="text" class="form-control" id="serial_no" name="serial_no" required>
                         </div>
 
-                        <!-- amount -->
+                        <!-- Amount -->
                         <div class="form-group">
                             <label for="amount">Amount</label>
-                            <input type="text" class="form-control" id="amount" name="amount" required>
+                            <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
                         </div>
 
-                        <!-- po_number -->
+                        <!-- Purchase Order Number -->
                         <div class="form-group">
                             <label for="po_number">Purchase Order No.</label>
                             <input type="text" class="form-control" id="po_number" name="po_number" required>
                         </div>
 
-                        <!-- date_acquired -->
+                        <!-- Date Acquired -->
                         <div class="form-group">
                             <label for="date_acquired">Date Acquired</label>
-                            <input type="text" class="form-control" id="date_acquired" name="date_acquired" required>
+                            <input type="date" class="form-control" id="date_acquired" name="date_acquired" required>
                         </div>
 
-                        <!-- end_user -->
+                        <!-- End User -->
                         <div class="form-group">
                             <label for="end_user">End User</label>
                             <input type="text" class="form-control" id="end_user" name="end_user" required>
                         </div>
 
-                        <!-- position -->
+                        <!-- Position -->
                         <div class="form-group">
                             <label for="position">Position</label>
                             <input type="text" class="form-control" id="position" name="position" required>
                         </div>
-                        
+
                         <!-- Division -->
                         <div class="form-group">
                             <label for="division">Division</label>
@@ -125,19 +125,19 @@
                             </select>
                         </div>
 
-                        <!-- actual_user -->
+                        <!-- Actual User -->
                         <div class="form-group">
-                            <label for="position">Actual User</label>
+                            <label for="actual_user">Actual User</label>
                             <input type="text" class="form-control" id="actual_user" name="actual_user" required>
                         </div>
 
-                        <!-- position_actual_user -->
+                        <!-- Actual User Position -->
                         <div class="form-group">
                             <label for="position_actual_user">Actual User Position</label>
                             <input type="text" class="form-control" id="position_actual_user" name="position_actual_user" required>
                         </div>
 
-                        <!-- remarks  -->
+                        <!-- Remarks -->
                         <div class="form-group">
                             <label for="remarks">Remarks</label>
                             <select class="form-control" id="remarks" name="remarks" required>
@@ -147,7 +147,7 @@
                             </select>
                         </div>
 
-                        <!-- fund source  -->
+                        <!-- Fund Source -->
                         <div class="form-group">
                             <label for="fund">Fund Source</label>
                             <select class="form-control" id="fund" name="fund" required>
@@ -160,14 +160,29 @@
                             </select>
                         </div>
 
+                        <!-- Lifespan -->
                         <div class="form-group">
                             <label for="lifespan">Lifespan</label>
                             <select class="form-control" id="lifespan" name="lifespan" required>
-                                <option value="1">1</option>
+                                <option value="2">2</option>
                                 <option value="3">3</option>
                                 <option value="5">5</option>
                                 <option value="7">7</option>
+                                <option value="10">10</option>
+                                <option value="15">15</option>
                             </select>
+                        </div>
+
+                        <!-- Date Renewed -->
+                        <div class="form-group">
+                            <label for="date_renewed">Date Renewed</label>
+                            <input type="text" class="form-control" id="date_renewed" name="date_renewed" readonly>
+                        </div>
+
+                        <!-- Uploaded By -->
+                        <div class="form-group">
+                            <label for="uploaded_by">Uploaded By</label>
+                            <input type="text" class="form-control" id="uploaded_by" name="uploaded_by" value="{{ Auth::user()->name }}" readonly>
                         </div>
 
                         <!-- Upload Image -->
@@ -186,13 +201,14 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <script>
 $(document).ready(function() {
     $('#division').change(function() {
         var div_id = $(this).val();
         if (div_id) {
             $.ajax({
-                url: '{{ url("sections") }}/' + div_id,
+                url: '{{ url("gss/admin/get-sections") }}/' + div_id,
                 type: "GET",
                 dataType: "json",
                 success: function(data) {
@@ -204,6 +220,17 @@ $(document).ready(function() {
             });
         } else {
             $('#section').empty();
+        }
+    });
+
+    $('#date_acquired, #lifespan').change(function() {
+        var dateAcquired = $('#date_acquired').val();
+        var lifespan = $('#lifespan').val();
+        if (dateAcquired && lifespan) {
+            var dateRenewed = moment(dateAcquired).add(lifespan, 'years').format('YYYY-MM-DD');
+            $('#date_renewed').val(dateRenewed);
+        } else {
+            $('#date_renewed').val('');
         }
     });
 });
