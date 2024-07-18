@@ -31,17 +31,17 @@
                         <div class="form-group">
                             <label for="category">Category</label>
                             <select class="form-control" id="category" name="category" required>
-                                <option value="05-Agricultural And Forestry Equipment">05-Agricultural And Forestry Equipment</option>
+                                <option value="05-Agricultural & Forestry Equipment">05-Agricultural & Forestry Equipment</option>
                                 <option value="05-Buildings">05-Buildings</option>
                                 <option value="05-Communication Equipment">05-Communication Equipment</option>
                                 <option value="05-Construction Equipment">05-Construction Equipment</option>
-                                <option value="06-Furniture And Fixtures">06-Furniture And Fixtures</option>
-                                <option value="05-Information And Communication Technology Equipment">05-Information And Communication Technology Equipment</option>
-                                <option value="05-Marine And Fishery Equipment">05-Marine And Fishery Equipment</option>
+                                <option value="06-Furniture & Fixtures">06-Furniture & Fixtures</option>
+                                <option value="05-Information & Communication Technology Equipment (ICT)">05-Information & Communication Technology Equipment</option>
+                                <option value="05-Marine & Fishery Equipment">05-Marine & Fishery Equipment</option>
                                 <option value="05-Office Equipment">05-Office Equipment</option>
                                 <option value="05-Other Land Improvements">05-Other Land Improvements</option>
                                 <option value="05-Sports Equipment">05-Sports Equipment</option>
-                                <option value="05-Technical And Scientific Equipment">05-Technical And Scientific Equipment</option>
+                                <option value="05-Technical & Scientific Equipment">05-Technical & Scientific Equipment</option>
                                 <option value="06-Transportation Equipment">06-Transportation Equipment</option>
                                 <option value="05-Watercrafts Equipment">05-Watercrafts Equipment</option>
                             </select>
@@ -105,6 +105,29 @@
                         <div class="form-group">
                             <label for="position">Position</label>
                             <input type="text" class="form-control" id="position" name="position" required>
+                        </div>
+
+                         <!-- Office -->
+                         <div class="form-group">
+                            <label for="office">Office</label>
+                            <select class="form-control" id="office" name="office" required>
+                                <option value="Regional Office">Regional Office</option>
+                                <option value="PENRO Camiguin">PENRO Camiguin</option>
+                                <option value="PENRO Bukidnon">PENRO Bukidnon</option>
+                                <option value="CENRO Don Carlos">CENRO Don Carlos</option>
+                                <option value="CENRO Manolo Fortich">CENRO Manolo Fortich</option>
+                                <option value="CENRO Talakag">CENRO Talakag</option>
+                                <option value="CENRO Valencia">CENRO Valencia</option>
+                                <option value="PENRO Lanao del Norte">PENRO Lanao del Norte</option>
+                                <option value="CENRO Iligan">CENRO Iligan</option>
+                                <option value="CENRO Kolambugan">CENRO Kolambugan</option>
+                                <option value="PENRO Misamis Occidental">PENRO Misamis Occidental</option>
+                                <option value="CENRO Oroquieta">CENRO Oroquieta</option>
+                                <option value="CENRO Ozamis">CENRO Ozamis</option>
+                                <option value="PENRO Misamis Oriental">PENRO Misamis Oriental</option>
+                                <option value="CENRO Gingoog">CENRO Gingoog</option>
+                                <option value="CENRO Initao">CENRO Initao</option>
+                            </select>
                         </div>
 
                         <!-- Division -->
@@ -203,6 +226,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <script>
+
+//division and section
 $(document).ready(function() {
     $('#division').change(function() {
         var div_id = $(this).val();
@@ -223,6 +248,7 @@ $(document).ready(function() {
         }
     });
 
+    //date_renewed
     $('#date_acquired, #lifespan').change(function() {
         var dateAcquired = $('#date_acquired').val();
         var lifespan = $('#lifespan').val();
@@ -233,6 +259,88 @@ $(document).ready(function() {
             $('#date_renewed').val('');
         }
     });
+});
+
+//property_number
+$(document).ready(function() {
+    function generatePropertyNumber() {
+        let office = $('#office').val();
+        let propertyType = $('#property_type').val();
+        let category = $('#category').val();
+        let amount = parseFloat($('#amount').val()) || 0;
+        let divisionId = $('#division').val();
+        let year = new Date().getFullYear();
+        
+        // Determine LV or HV
+        let lvhv = amount < 5000 ? "LV" : "HV";
+        
+        // Extract category code
+        let categoryCode = category.substring(0, 2);
+        
+        // Determine General Ledger Account
+        let generalLedgerAccount = "00";
+        if (category.includes("Buildings")) {
+            generalLedgerAccount = "01";
+        } else if (category.includes("Hostel & Dorm")) {
+            generalLedgerAccount = "06";
+        } else if (category.includes("Office Equipment")) {
+            generalLedgerAccount = "02";
+        } else if (category.includes("ICT")) {
+            generalLedgerAccount = "03";
+        } else if (category.includes("Agricultural & Forestry")) {
+            generalLedgerAccount = "04";
+        } else if (category.includes("Marine & Fishery")) {
+            generalLedgerAccount = "05";
+        } else if (category.includes("Communication")) {
+            generalLedgerAccount = "07";
+        } else if (category.includes("Technical & Scientific")) {
+            generalLedgerAccount = "14";
+        } else if (categoryCode === "06") {
+            generalLedgerAccount = "99";
+        }
+
+        // Determine office code
+        let officeCode = "XX";
+        switch (office) {
+            case "Regional Office": officeCode = "RX"; break;
+            case "PENRO Camiguin": officeCode = "PC"; break;
+            case "PENRO Bukidnon": officeCode = "PB"; break;
+            case "CENRO Don Carlos": officeCode = "CD"; break;
+            case "CENRO Manolo Fortich": officeCode = "CM"; break;
+            case "CENRO Talakag": officeCode = "CT"; break;
+            case "CENRO Valencia": officeCode = "CV"; break;
+            case "PENRO Lanao del Norte": officeCode = "PL"; break;
+            case "CENRO Iligan": officeCode = "CIG"; break;
+            case "CENRO Kolambugan": officeCode = "CK"; break;
+            case "PENRO Misamis Occidental": officeCode = "PMC"; break;
+            case "CENRO Oroquieta": officeCode = "COR"; break;
+            case "CENRO Ozamiz": officeCode = "COZ"; break;
+            case "PENRO Misamis Oriental": officeCode = "PMR"; break;
+            case "CENRO Gingoog": officeCode = "CG"; break;
+            case "CENRO Initao": officeCode = "CIN"; break;
+        }
+
+        // Series number based on serviceable count
+        let seriesNumber = "0000";
+        if (propertyType === "PAR") {
+            seriesNumber = '{{ str_pad($parCount + 1, 4, "0", STR_PAD_LEFT) }}';
+        } else {
+            seriesNumber = (lvhv === "LV" ? '{{ str_pad($lvCount + 1, 4, "0", STR_PAD_LEFT) }}' : '{{ str_pad($hvCount + 1, 4, "0", STR_PAD_LEFT) }}');
+        }
+
+        // Construct property number
+        let propertyNumber = "";
+        if (propertyType === "PAR") {
+            propertyNumber = `${officeCode}-${year}-${categoryCode}-${generalLedgerAccount}-${seriesNumber}-${divisionId}`;
+        } else if (propertyType === "ICS") {
+            propertyNumber = `${officeCode}-${lvhv}-${year}-${categoryCode}-${generalLedgerAccount}-${seriesNumber}-${divisionId}`;
+        }
+
+        $('#property_number').val(propertyNumber);
+    }
+
+    // Trigger generation on change
+    $('#property_type, #category, #amount, #division, #office').change(generatePropertyNumber);
 });
 </script>
 @endsection

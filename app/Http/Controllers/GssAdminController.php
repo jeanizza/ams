@@ -21,7 +21,11 @@ class GssAdminController extends Controller
     public function add_record()
     {
         $divisions = Division::all();
-        return view('gss.admin.serviceable.add_record', compact('divisions'));
+        $lvCount = AddRecord::where('property_type', 'ICS')->where('amount', '<', 5000)->count();
+        $hvCount = AddRecord::where('property_type', 'ICS')->where('amount', '>=', 5000)->count();
+        $parCount = AddRecord::where('property_type', 'PAR')->count();
+       
+        return view('gss.admin.serviceable.add_record', compact('divisions', 'lvCount', 'hvCount', 'parCount'));
     }
 
         public function getSections($div_id)
@@ -46,6 +50,7 @@ class GssAdminController extends Controller
                 'po_number' => 'required|string|max:20',
                 'end_user' => 'required|string|max:150',
                 'position' => 'required|string|max:150',
+                'office' => 'required|string',
                 'division' => 'required|exists:division_pits,div_id',
                 'section' => 'required|exists:section,sec_id',
                 'actual_user' => 'required|string|max:150',
