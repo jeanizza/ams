@@ -7,7 +7,11 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Division;
 use App\Models\Section;
 use App\Models\AddRecord;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Carbon\Carbon;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use Illuminate\Support\Facades\Storage;
 
 class GssAdminController extends Controller
 {
@@ -73,11 +77,15 @@ class GssAdminController extends Controller
                 $validatedData['upload_image'] = $request->file('upload_image')->store('uploads', 'public');
             }
 
-            // Create the record
-            AddRecord::create($validatedData);
+            // Create the record and get the instance
+            $record = AddRecord::create($validatedData); 
 
-            // Redirect with success message
-            return redirect()->route('gss.admin.add_record')->with('success', 'Record added successfully');
+            // Generate and save the Excel file
+           // $this->generateExcel($record->id);
+            
+             // Redirect with success message and property number
+            return redirect()->route('gss.admin.add_record')->with(['success' => 'Record added successfully', 'propertyNumber' => $record->property_number]);
+        
         }
 
 
@@ -100,4 +108,54 @@ class GssAdminController extends Controller
     {
         return view('gss.admin.reconciliation');
     }
+
+    public function generatePdf($propertyNumber)
+    {
+        $record = AddRecord::where('property_number', $propertyNumber)->first();
+
+        if (!$record) {
+            return redirect()->back()->with('error', 'Record not found.');
+        }
+
+        // Create the HTML content for the PDF
+        $htmlContent = view('gss.admin.serviceable.serviceable_template', compact('record'))->render();
+
+        // Set up Dompdf options
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+
+        // Initialize Dompdf
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($htmlContent);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Output the generated PDF to a file
+        $filename = 'Record_' . $record->property_number . '.pdf';
+        $filePath = storage_path('app/public/' . $filename);
+
+        try {
+            file_put_contents($filePath, $dompdf->output());
+        } catch (Exception $e) {
+            \Log::error('File put contents error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to save PDF.');
+        }
+
+        \Log::info('File path: ' . $filePath);
+        \Log::info('File exists: ' . (file_exists($filePath) ? 'yes' : 'no'));
+
+        if (file_exists($filePath)) {
+            return response()->download($filePath)->deleteFileAfterSend(true);
+        } else {
+            \Log::error('PDF file not found after creation: ' . $filePath);
+            return redirect()->back()->with('error', 'File not found.');
+        }
+    }
+
+
+
+
+
+    
 }

@@ -10,6 +10,37 @@
             <div class="card">
                 <div class="card-header">Add Record</div>
                 <div class="card-body">
+
+                    <!-- @if(session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                        <button class="btn btn-primary" id="download-excel">Download Excel</button>
+                        <button class="btn btn-secondary" id="ok-button">Okay</button>
+                    </div>
+                    @endif -->
+
+                    @if(session('success'))
+                        <div class="modal" id="successModal" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Success</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Record added successfully. Property Number: {{ session("propertyNumber") }}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" id="download-pdf" class="btn btn-primary">Download PDF</button>
+                                        <button type="button" id="ok-button" class="btn btn-secondary" data-dismiss="modal">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <form action="{{ route('gss.admin.store_add_record') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <!-- Property Type -->
@@ -225,6 +256,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
 
 //division and section
@@ -342,5 +374,36 @@ $(document).ready(function() {
     // Trigger generation on change
     $('#property_type, #category, #amount, #division, #office').change(generatePropertyNumber);
 });
+
+//generate download file
+/****$(document).ready(function() {
+    @if(session('success'))
+        $('#download-excel').click(function() {
+            let propertyNumber = '{{ session("propertyNumber") }}';
+            window.location.href = '{{ url("/generate-excel") }}/' + propertyNumber;
+        });
+
+        $('#ok-button').click(function() {
+            window.location.href = '{{ route("gss.admin.add_record") }}';
+        });
+    @endif
+});***/
+
+$(document).ready(function() {
+            @if(session('success'))
+                $('#successModal').modal('show'); // Show the modal
+
+                $('#download-pdf').click(function() {
+                    let propertyNumber = '{{ session("propertyNumber") }}';
+                    window.location.href = '{{ url("/generate-pdf") }}/' + propertyNumber;
+                });
+
+                $('#ok-button').click(function() {
+                    window.location.href = '{{ route("gss.admin.add_record") }}';
+                });
+            @endif
+        });
+
+
 </script>
 @endsection

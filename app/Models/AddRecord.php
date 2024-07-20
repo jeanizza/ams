@@ -10,6 +10,7 @@ class AddRecord extends Model
     use HasFactory;
 
     protected $table = 'add_record'; // define the add_record the table name
+    protected $primaryKey = 'add_record_id';
 
     protected $fillable = [
         'property_type', 'property_number', 'category', 'particular', 'description', 'brand', 'model', 'serial_no', 'amount', 'date_acquired', 'po_number', 'end_user', 'position', 'office', 'div_id', 'sec_id', 'actual_user', 'position_actual_user', 'remarks', 'fund', 'lifespan', 'date_renewed', 'upload_image', 'uploaded_by', 'date_created'
