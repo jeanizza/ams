@@ -19,6 +19,8 @@ class User extends Authenticatable
         'username',
         'password',
         'office',
+        'div_name',
+        'sec_name',
         'role',
     ];
 

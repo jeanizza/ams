@@ -55,7 +55,7 @@
                         <!-- Property Number -->
                         <div class="form-group">
                             <label for="property_number">Property Number</label>
-                            <input type="text" class="form-control" id="property_number" name="property_number" required>
+                            <input type="text" class="form-control" id="property_number" name="property_number" readonly required>
                         </div>
 
                         <!-- Category -->
@@ -166,8 +166,8 @@
                             <label for="division">Division</label>
                             <select class="form-control" id="division" name="division" required>
                                 @foreach($divisions as $division)
-                                    <option value="{{ $division->div_id }}">{{ $division->div_name }}</option>
-                                @endforeach
+                                        <option value="{{ $division->div_id }}">{{ $division->div_name }}</option>
+                                    @endforeach
                             </select>
                         </div>
 
@@ -216,7 +216,7 @@
 
                         <!-- Lifespan -->
                         <div class="form-group">
-                            <label for="lifespan">Lifespan</label>
+                            <label for="lifespan">Estimated Useful Life</label>
                             <select class="form-control" id="lifespan" name="lifespan" required>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -229,7 +229,7 @@
 
                         <!-- Date Renewed -->
                         <div class="form-group">
-                            <label for="date_renewed">Date Renewed</label>
+                            <label for="date_renewed">Date Terminous</label>
                             <input type="text" class="form-control" id="date_renewed" name="date_renewed" readonly>
                         </div>
 
@@ -265,7 +265,7 @@ $(document).ready(function() {
         var div_id = $(this).val();
         if (div_id) {
             $.ajax({
-                url: '{{ url("gss/admin/get-sections") }}/' + div_id,
+                url: '{{ url("get-sections") }}/' + div_id,
                 type: "GET",
                 dataType: "json",
                 success: function(data) {

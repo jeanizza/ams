@@ -11,35 +11,35 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        switch ($user->office) {
-            case 'procurement services section':
-                if ($user->role === 'admin') {
-                    return redirect()->route('procurement.admin.dashboard');
-                } elseif ($user->role === 'user') {
-                    return redirect()->route('procurement.user.dashboard');
-                }
-                break;
-
-            case 'general services section':
+        if ($user->div_name === 'Administrative Division') {
+            if ($user->sec_name === 'General Services Section') {
                 if ($user->role === 'admin') {
                     return redirect()->route('gss.admin.dashboard');
                 } elseif ($user->role === 'user') {
                     return redirect()->route('gss.user.dashboard');
                 }
-                break;
-
-            case 'accounting section':
-                return redirect()->route('accounting.dashboard');
-
-            default:
+            } elseif ($user->sec_name === 'Procurement Services Section') {
                 if ($user->role === 'admin') {
-                    return redirect()->route('admin.dashboard');
+                    return redirect()->route('procurement.admin.dashboard');
                 } elseif ($user->role === 'user') {
-                    return redirect()->route('user.dashboard');
+                    return redirect()->route('procurement.user.dashboard');
                 }
-                break;
+            }
+        } elseif ($user->div_name === 'Finance Division') {
+            if ($user->role === 'admin') {
+                return redirect()->route('accounting.admin.dashboard');
+            } elseif ($user->role === 'user') {
+                return redirect()->route('accounting.user.dashboard');
+            }
+        }
+
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->role === 'user') {
+            return redirect()->route('user.dashboard');
         }
 
         return abort(403, 'Unauthorized action.');
     }
+    
 }

@@ -14,12 +14,15 @@ class CheckRoleAndOffice
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, $role, $office)
+    public function handle(Request $request, Closure $next, $role, $div_name, $sec_name = null)
     {
         $user = Auth::user();
-        if ($user && $user->role === $role && $user->office === $office) {
-            return $next($request);
+        if ($user && $user->role === $role && $user->div_name === $div_name) {
+            if ($sec_name === null || $user->sec_name === $sec_name) {
+                return $next($request);
+            }
         }
+        
         return abort(403, 'Unauthorized action.');
     }
 }

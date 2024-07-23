@@ -52,67 +52,135 @@
             white-space: nowrap;
             pointer-events: none;
         }
+        .ics-table thead th, .ics-table thead td {
+            text-align: center;
+            vertical-align: middle !important;
+        }
+        .ics-table-top td {
+            border: none !important;
+        }
+        .header-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .appendix {
+            text-align: right;
+            width: 95%;
+            font-style: italic;
+        }
+        .appendix h4 {
+            font-size: 20px;
+        }
+        @page {
+            margin:20px !important;
+        }
+        .ics-table ul li {
+            list-style: none;
+        }
+                .ics-table ul {
+            padding: 0 0 0 5px;
+        }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
     <!--if ICS is selected-->
     @if ($record->property_type === 'ICS')
-    <div class="container">
+    <div class="container table-container">
         <!-- Watermark -->
-        <div class="watermark">Hey Soul Sister</div>
-
+        <!-- <div class="watermark">Hey Soul Sister</div> -->
+            <div class="row">
+        <div class="appendix">
+            <h4>Appendix 59</h4>
+        </div>
+        </div> 
         <!-- Header -->
-        <div class="header">
-            <h1>Your Company Name</h1>
+        <div class="header-title">
+            <h4>INVENTORY CUSTODIAN  SLIP</h4>
         </div>
 
-        <!-- Content -->
-        <div class="content">
+        <div class="top-row row">
+            <table class="ics-table-top table">
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="col">
+                                <div class="label"><b>Entity Name:</b> DENR 10, {{ $record->office }}</div>
+                                <div class="label"><b>Fund Cluster:</b> {{ $record->fund }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="col">
+                                <div class="label"><b>ICS No.:</b> {{ $record->property_number }}</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
 
-            <div class="section">
-                <div class="label">Entity Name: DENR 10, {{ $record->office }}</div>
-            </div>
-
-            <div class="section">
-                <div class="label">Property Number:</div>
-                <div>{{ $record->property_number }}</div>
-            </div>
-            <div class="section">
-                <div class="label">Date Acquired:</div>
-                <div>{{ $record->date_acquired }}</div>
-            </div>
-            <div class="section">
-                <div class="label">Amount:</div>
-                <div>{{ $record->amount }}</div>
-            </div>
-            <div class="section">
-                <div class="label">End User:</div>
-                <div>{{ $record->end_user }}</div>
-            </div>
-            <div class="section">
-                <div class="label">Position:</div>
-                <div>{{ $record->position }}</div>
-            </div>
-                <div class="section">
-                    <div class="label">Authorized By:</div>
-                    <div>Michelle S. Millana<br>Administrative Officer IV</div>
-                </div>
-                <div class="section">
-                    <div class="label">Description:</div>
-                    <div>{{ $record->description }}<br>{{ $record->brand }}<br>{{ $record->model }}<br>{{ $record->serial_no }}</div>
-                </div>
-                <div class="section">
-                    <div class="label">Lifespan:</div>
-                    <div>{{ $record->lifespan }}</div>
-                </div>
         </div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <p>Additional Information</p>
-            <p>Contact Us: [Your Contact Info]</p>
-        </div>
+    <div class="table-responsive">
+        <table class="ics-table table table-bordered">
+            <thead>
+                <tr>
+                    <th rowspan="2" scope="col">Quantity</th>
+                    <th rowspan="2" scope="col">Unit</th>
+                    <th colspan="2">Amount</th>
+                    <th rowspan="2" scope="col">Description</th>
+                    <th rowspan="2" scope="col">Inventory Item No.</th>
+                    <th rowspan="2" scope="col">Estimated Useful Life</th>
+                </tr>
+                <tr>
+                    <td>Unit Cost</td>
+                    <td>Total Cost</td>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Repeat this block for each row in the table -->
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <ul>
+                            <li><b>Category:</b> {{ $record->category }}</li>
+                            <li><b>Particular:</b> {{ $record->particular }}</li>
+                            <li><b>Description:</b> {{ $record->description }}</li>
+                            <li><b>Brand:</b> {{ $record->brand }}</li>
+                            <li><b>Model:</b> {{ $record->model }}</li>
+                            <li><b>Serial No.:</b> {{ $record->serial_no }}</li>
+                        </ul>
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div class="col">
+                            <p>Received from:</p>
+                            <p>Signature Over Printed Name</p>
+                            <p>Position/Office</p>
+                            <p>Date</p>
+                        </div>
+                    </td>
+                    <td colspan="3">
+                        <div class="col">
+                            <p>Received by:</p>
+                            <p>Signature Over Printed Name</p>
+                            <p>Position/Office</p>
+                            <p>Date</p>
+                        </div>
+                    </td>
+                </tr>
+                <!-- End repeat -->
+            </tbody>
+        </table>
     </div>
+</div>
     @endif <!--for ICS-->
     
 </body>

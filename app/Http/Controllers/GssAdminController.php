@@ -4,14 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+
 use App\Models\Division;
 use App\Models\Section;
 use App\Models\AddRecord;
+use App\Models\Serviceable;
+
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use Illuminate\Support\Facades\Storage;
+
+
+
 
 class GssAdminController extends Controller
 {
@@ -32,11 +39,11 @@ class GssAdminController extends Controller
         return view('gss.admin.serviceable.add_record', compact('divisions', 'lvCount', 'hvCount', 'parCount'));
     }
 
-        public function getSections($div_id)
-        {
-            $sections = Section::where('div_id', $div_id)->pluck('sec_name', 'sec_id');
-            return response()->json($sections);
-        }
+    public function getSections($div_id)
+    {
+        $sections = Section::where('div_id', $div_id)->pluck('sec_name', 'sec_id');
+        return response()->json($sections);
+    }
 
         public function storeAddRecord(Request $request)
         {
@@ -89,9 +96,88 @@ class GssAdminController extends Controller
         }
 
 
-    public function transfer_property()
+    public function list_serviceable(Request $request)
     {
-        return view('gss.admin.serviceable.transfer_property');
+
+        $user = Auth::user();
+        $query = DB::table('serviceable')
+            ->where(function($q) use ($user) {
+                $q->where('office', 'like', '%' . $user->office . '%')
+                  ->orWhere('office', 'like', '%region%')
+                  ->orWhere('office', 'like', '%regional office%');
+            });
+
+        // Search functionality
+        if ($request->has('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('property_type', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('property_number', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('category', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('status', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('particular', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('description', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('serial_no', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('model', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('brand', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('amount', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('date_acquired', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('po_number', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('end_user', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('position', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('office', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('division', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('section', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('actual_user', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('position_actual_user', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('remarks', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('fund', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('lifespan', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('date_renewed', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('uploaded_by', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+            // Paginate results
+            $serviceables = $query->paginate(20);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'table_data' => view('gss.admin.serviceable.table_data', compact('serviceables'))->render(),
+                    'pagination' => view('gss.admin.serviceable.pagination_links', compact('serviceables'))->render()
+                ]);
+            }
+        
+
+            return view('gss.admin.serviceable.list_serviceable', compact('serviceables'));
+    }
+
+    public function updateServiceableForm($id)
+    {
+        // Fetch the serviceable item by ID and return the update view
+        $serviceable = Serviceable::findOrFail($id);
+        return view('gss.admin.serviceable.update_serviceable', compact('serviceable'));
+    }
+
+    public function updateServiceable(Request $request, $id)
+    {
+        $serviceable = Serviceable::findOrFail($id);
+        $serviceable->update($request->all());
+        return redirect()->route('gss.admin.list_serviceable')->with('success', 'Serviceable record updated successfully.');
+    }
+
+    public function transferServiceableForm($id)
+    {
+        // Fetch the serviceable item by ID and return the transfer view
+        $serviceable = Serviceable::findOrFail($id);
+        return view('gss.admin.serviceable.transfer_serviceable', compact('serviceable'));
+    }
+
+    public function transferServiceable(Request $request, $id)
+    {
+        $serviceable = Serviceable::findOrFail($id);
+        $serviceable->update($request->all());
+        return redirect()->route('gss.admin.list_serviceable')->with('success', 'Serviceable record transferred successfully.');
     }
 
     public function unserviceable()
@@ -152,10 +238,5 @@ class GssAdminController extends Controller
             return redirect()->back()->with('error', 'File not found.');
         }
     }
-
-
-
-
-
     
 }
