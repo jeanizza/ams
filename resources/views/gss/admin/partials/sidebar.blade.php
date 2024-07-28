@@ -17,23 +17,23 @@
                 </li>
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-cogs"></i>
+                        <i class="nav-icon fas fa-clipboard-list"></i>
                         <p>
-                            Serviceable
+                            Inventory Management
                             <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>  
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
                             <a href="{{ route('gss.admin.add_record') }}" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
+                                <i class="fas fa-file-alt nav-icon"></i>
                                 <p>Add Record</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('gss.admin.transfer_property') }}" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Transfer Property</p>
+                            <a href="{{ route('gss.admin.list_serviceable') }}" class="nav-link">
+                                <i class="fas fa-edit nav-icon circle-icon"></i>
+                                <p>Update</p>
                             </a>
                         </li>
                     </ul>
