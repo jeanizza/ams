@@ -87,4 +87,4 @@ Route::middleware(['auth', PreventBackHistory::class, CheckRoleAndOffice::class 
 Route::get('/get-sections/{div_id}', [GssAdminController::class, 'getSections'])->name('get.sections');
 
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('register', [RegisterController::class, 'register'])->name('register');
+Route::post('register', [RegisterController::class, 'register'])->name('register.post');

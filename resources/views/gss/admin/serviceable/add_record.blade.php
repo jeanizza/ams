@@ -47,6 +47,7 @@
                         <div class="form-group">
                             <label for="property_type">Property Type</label>
                             <select class="form-control" id="property_type" name="property_type" required>
+                                <option value="" disabled selected hidden>Choose an Option</option>
                                 <option value="PAR">Property Acknowledgment Receipt</option>
                                 <option value="ICS">Inventory Custodian Slip</option>
                             </select>
@@ -62,6 +63,7 @@
                         <div class="form-group">
                             <label for="category">Category</label>
                             <select class="form-control" id="category" name="category" required>
+                                <option value="" disabled selected hidden>Choose an Option</option>
                                 <option value="05-Agricultural & Forestry Equipment">05-Agricultural & Forestry Equipment</option>
                                 <option value="05-Buildings">05-Buildings</option>
                                 <option value="05-Communication Equipment">05-Communication Equipment</option>
@@ -142,6 +144,7 @@
                          <div class="form-group">
                             <label for="office">Office</label>
                             <select class="form-control" id="office" name="office" required>
+                                <option value="" disabled selected hidden>Choose an Option</option>
                                 <option value="Regional Office">Regional Office</option>
                                 <option value="PENRO Camiguin">PENRO Camiguin</option>
                                 <option value="PENRO Bukidnon">PENRO Bukidnon</option>
@@ -165,6 +168,7 @@
                         <div class="form-group">
                             <label for="division">Division</label>
                             <select class="form-control" id="division" name="division" required>
+                                <option value="" disabled selected hidden>Choose an Option</option>
                                 @foreach($divisions as $division)
                                     <option value="{{ $division->div_name }}" data-div-id="{{ $division->div_id }}">{{ $division->div_name }}</option>
                                 @endforeach
@@ -176,6 +180,7 @@
                         <div class="form-group">
                             <label for="section">Section</label>
                             <select class="form-control" id="section" name="section" required>
+                                <option value="" disabled selected hidden>Choose an Option</option>
                                 <!-- Sections will be dynamically loaded based on the selected division -->
                             </select>
                         </div>
@@ -196,6 +201,7 @@
                         <div class="form-group">
                             <label for="remarks">Remarks</label>
                             <select class="form-control" id="remarks" name="remarks" required>
+                                <option value="" disabled selected hidden>Choose an Option</option>
                                 <option value="purchased">Purchased</option>
                                 <option value="central office fund">Central Office Fund</option>
                                 <option value="field office fund">Field Office Fund</option>
@@ -206,6 +212,7 @@
                         <div class="form-group">
                             <label for="fund">Fund Source</label>
                             <select class="form-control" id="fund" name="fund" required>
+                                <option value="" disabled selected hidden>Choose an Option</option>
                                 <option value="101">101</option>
                                 <option value="102">102</option>
                                 <option value="158">158</option>
@@ -219,6 +226,7 @@
                         <div class="form-group">
                             <label for="lifespan">Estimated Useful Life</label>
                             <select class="form-control" id="lifespan" name="lifespan" required>
+                                <option value="" disabled selected hidden>Choose an Option</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
                                 <option value="5">5</option>

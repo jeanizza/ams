@@ -201,17 +201,13 @@ public function updateServiceable(Request $request, $id)
     // Filter the request data to include only necessary fields
     $commonData = $request->only([
         'category', 'particular', 'description', 'brand', 'model', 'serial_no', 'date_acquired',
-        'po_number', 'end_user', 'position', 'actual_user', 'remarks', 'fund', 'lifespan', 'date_renewed'
+        'po_number', 'end_user', 'position', 'actual_user', 'remarks', 'fund', 'lifespan', 'amount', 'date_renewed'
     ]);
 
-    // Add the amount field for add_record or value field for equipment based on the source table
-    if ($serviceable->source === 'add_record') {
-        $commonData['amount'] = $request->input('amount');
-    } elseif ($serviceable->source === 'equipment') {
-        $commonData['value'] = $request->input('amount');
-    }
+    // Handle date_renewed properly
+    $commonData['date_renewed'] = ($request->input('date_renewed') == '0000-00-00' || empty($request->input('date_renewed'))) ? null : $request->input('date_renewed');
 
-    // Check if upload_image is provided
+    // Check if upload_image is provided and include it in commonData
     if ($request->hasFile('upload_image')) {
         $commonData['upload_image'] = $request->file('upload_image')->store('uploads', 'public');
     }
@@ -223,6 +219,12 @@ public function updateServiceable(Request $request, $id)
             // Map division and section to names for add_record table
             $commonData['div_name'] = $request->input('division');
             $commonData['sec_name'] = $request->input('section');
+
+            if (empty($commonData['sec_name'])) {
+                \Log::error('Section name cannot be empty.');
+                return redirect()->back()->with('error', 'Section name cannot be empty.');
+            }
+
             $commonData['position_actual_user'] = $request->input('position_actual_user');
 
             \Log::info('Data with division and section names for add_record:', $commonData);
@@ -237,6 +239,11 @@ public function updateServiceable(Request $request, $id)
             // Map division and section to names for equipment table
             $commonData['division'] = $request->input('division');
             $commonData['section'] = $request->input('section');
+
+            if (empty($commonData['section'])) {
+                \Log::error('Section name cannot be empty.');
+                return redirect()->back()->with('error', 'Section name cannot be empty.');
+            }
 
             // Remove fields not present in the equipment table
             unset($commonData['position_actual_user']);
@@ -260,6 +267,7 @@ public function updateServiceable(Request $request, $id)
         return redirect()->back()->with('error', 'Error updating serviceable record.');
     }
 }
+
 
 
 
