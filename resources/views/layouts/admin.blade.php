@@ -14,7 +14,7 @@
     <style>
         .navbar-nav .nav-link {
             margin-right: 15px;
-        }
+        } 
         .user-name {
             margin-right: 20px;
         }

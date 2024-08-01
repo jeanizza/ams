@@ -6,7 +6,7 @@
 @section('content')
 <div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">Update Serviceable</div>
                 <div class="card-body">
@@ -231,7 +231,6 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Handle division change event to fetch sections
     $('#division').change(function() {
         var div_name = $(this).val();
         if (div_name) {
@@ -242,7 +241,7 @@ $(document).ready(function() {
                 success: function(data) {
                     $('#section').empty();
                     $.each(data, function(key, value) {
-                        $('#section').append('<option value="'+ key +'">'+ value +'</option>');
+                        $('#section').append('<option value="'+ value +'">'+ value +'</option>');
                     });
                 }
             });
@@ -250,8 +249,9 @@ $(document).ready(function() {
             $('#section').empty();
         }
     });
+});
 
-    // Calculate and set date renewed
+ // Calculate and set date renewed
     $('#date_acquired, #lifespan').change(function() {
         var dateAcquired = $('#date_acquired').val();
         var lifespan = $('#lifespan').val();
@@ -274,6 +274,7 @@ $(document).ready(function() {
             window.location.href = '{{ route("gss.admin.list_serviceable") }}';
         });
     @endif
-});
+
+
 </script>
 @endsection

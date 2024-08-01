@@ -9,7 +9,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">List of Serviceable</div>
-                <div class="card-body">
+                <div class="card-body"> 
 
                     <!-- Search Form -->
                     <form method="GET" action="{{ route('gss.admin.list_serviceable') }}" id="search-form">
@@ -27,8 +27,9 @@
                             <th>Office</th>
                             <th>End User</th>
                             <th>Division</th>
+                            <th>Section</th>
+                            <th>Amount</th>
                             <th>Upload Image</th>
-                            <!-- Add other columns as necessary -->
                             <th>Actions</th>
                         </tr>
                     </thead>

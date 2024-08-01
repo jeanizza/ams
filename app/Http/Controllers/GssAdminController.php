@@ -12,6 +12,7 @@ use App\Models\Section;
 use App\Models\AddRecord;
 use App\Models\Serviceable;
 use App\Models\Equipment;
+use App\Models\Transfer;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Carbon\Carbon;
@@ -184,6 +185,29 @@ public function updateServiceable(Request $request, $id)
 {
     \Log::info('Request data received:', $request->all());
 
+     // Validate the input data
+     $request->validate([
+        'division' => 'required|string',
+        'section' => 'required|string',
+        'category' => 'nullable|string',
+        'particular' => 'nullable|string',
+        'description' => 'nullable|string',
+        'brand' => 'nullable|string',
+        'model' => 'nullable|string',
+        'serial_no' => 'nullable|string',
+        'date_acquired' => 'nullable|date',
+        'po_number' => 'nullable|string',
+        'end_user' => 'nullable|string',
+        'position' => 'nullable|string',
+        'actual_user' => 'nullable|string',
+        'remarks' => 'nullable|string',
+        'fund' => 'nullable|string',
+        'lifespan' => 'nullable|integer',
+        'amount' => 'nullable|numeric',
+        'date_renewed' => 'nullable|date',
+        'upload_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+    ]);
+
     // Fetch the serviceable item by ID from the view
     $serviceable = DB::table('serviceable')->where('id', $id)->first();
 
@@ -203,6 +227,11 @@ public function updateServiceable(Request $request, $id)
         'category', 'particular', 'description', 'brand', 'model', 'serial_no', 'date_acquired',
         'po_number', 'end_user', 'position', 'actual_user', 'remarks', 'fund', 'lifespan', 'amount', 'date_renewed'
     ]);
+
+    // Ensure amount is a float
+    if (isset($commonData['amount'])) {
+        $commonData['amount'] = (float)str_replace(',', '', $commonData['amount']);
+    }
 
     // Handle date_renewed properly
     $commonData['date_renewed'] = ($request->input('date_renewed') == '0000-00-00' || empty($request->input('date_renewed'))) ? null : $request->input('date_renewed');
@@ -245,17 +274,24 @@ public function updateServiceable(Request $request, $id)
                 return redirect()->back()->with('error', 'Section name cannot be empty.');
             }
 
-            // Remove fields not present in the equipment table
-            unset($commonData['position_actual_user']);
-
             \Log::info('Data with names for equipment:', $commonData);
 
-            // Update equipment table
-            $affectedRows = DB::table('equipment')
-                ->where('equipment_id', $serviceable->id)
-                ->update($commonData);
+            // Ensure commonData keys match equipment columns
+            $columns = \Schema::getColumnListing('equipment');
+            $filteredData = array_intersect_key($commonData, array_flip($columns));
+            \Log::info('Filtered common data after column match:', $filteredData);
 
-            \Log::info("Updated equipment table, ID: {$serviceable->id}, Affected Rows: {$affectedRows}");
+            // Update equipment table using Eloquent
+            $equipment = Equipment::find($serviceable->id);
+
+            if (!$equipment) {
+                \Log::error('Equipment item not found.');
+                return redirect()->back()->with('error', 'Equipment item not found.');
+            }
+
+            $equipment->update($filteredData);
+
+            \Log::info("Updated equipment table, ID: {$serviceable->id}");
         } else {
             \Log::error('Unable to determine the source table.');
             return redirect()->back()->with('error', 'Unable to determine the source table.');
@@ -270,37 +306,107 @@ public function updateServiceable(Request $request, $id)
 
 
 
-
-    private function getDivisionName($div_id)
-    {
-        return Division::where('div_id', $div_id)->value('div_name');
-    }
-
-    private function getSectionName($sec_id)
-    {
-        return Section::where('sec_id', $sec_id)->value('sec_name');
-    }
-
     public function transferServiceableForm($id)
     {
-        // Fetch the serviceable item by ID and return the transfer view
+        // Fetch the serviceable item by ID
         $serviceable = DB::table('serviceable')->where('id', $id)->first();
-        return view('gss.admin.serviceable.transfer_serviceable', compact('serviceable'));
+
+        // Fetch divisions for the dropdown
+        $divisions = Division::all();
+
+        // Fetch div_id for the given division name
+        $division = Division::where('div_name', $serviceable->division)->first();
+
+        // Fetch sections based on the div_id
+        $sections = $division ? Section::where('div_id', $division->div_id)->get() : [];
+
+        return view('gss.admin.serviceable.transfer_serviceable', compact('serviceable', 'divisions', 'sections'));
     }
 
     public function transferServiceable(Request $request, $id)
     {
-        // Fetch the serviceable item by ID from the view
-        $serviceable = DB::table('serviceable')->where('id', $id)->first();
-
-        // Determine which table to update
-        if ($serviceable->source_table == 'add_record') {
-            DB::table('add_record')->where('id', $serviceable->id)->update($request->all());
-        } else {
-            DB::table('equipment')->where('id', $serviceable->id)->update($request->all());
+            \Log::info('Transfer request data received:', $request->all());
+        
+            // Fetch the serviceable item by ID from the view
+            $serviceable = DB::table('serviceable')->where('id', $id)->first();
+        
+            if (!$serviceable) {
+                \Log::error('Serviceable item not found.');
+                return redirect()->back()->with('error', 'Serviceable item not found.');
+            }
+        
+            $transferData = $request->only([
+                'property_number', 'end_user', 'position', 'transfer_office',
+                'division as transfer_division', 'transfer_enduser', 'transfer_position', 
+                'transfer_condition', 'reason_transfer', 'date_transfer'
+            ]);
+        
+            \Log::info('Prepared transfer data:', $transferData);
+        
+            try {
+                DB::transaction(function () use ($serviceable, $transferData) {
+                    // Insert into transfer table
+                    Transfer::create($transferData);
+                    \Log::info('Inserted into transfer_data table:', $transferData);
+        
+                    // Update remarks column in the source table
+                    if ($serviceable->source_table == 'add_record') {
+                        DB::table('add_record')->where('id', $serviceable->id)->update(['remarks' => 'transfer']);
+                        \Log::info('Updated add_record table, ID:', $serviceable->id);
+                    } else {
+                        DB::table('equipment')->where('id', $serviceable->id)->update(['remarks' => 'transfer']);
+                        \Log::info('Updated equipment table, ID:', $serviceable->id);
+                    }
+                });
+        
+                return redirect()->route('gss.admin.list_serviceable')->with('success', 'Serviceable record transferred successfully.');
+            } catch (\Exception $e) {
+                \Log::error('Error transferring serviceable item: ' . $e->getMessage());
+                return redirect()->back()->with('error', 'Error transferring serviceable item: ' . $e->getMessage());
+            }
         }
 
-        return redirect()->route('gss.admin.list_serviceable')->with('success', 'Serviceable record transferred successfully.');
+    public function unserviceableForm($id)
+    {
+        // Fetch the serviceable item by ID
+    $serviceable = DB::table('serviceable')->where('id', $id)->first();
+
+    // Fetch divisions for the dropdown
+    $divisions = Division::all();
+
+    // Fetch div_id for the given division name
+    $division = Division::where('div_name', $serviceable->division)->first();
+
+    // Fetch sections based on the div_id
+    $sections = $division ? Section::where('div_id', $division->div_id)->get() : [];
+
+    return view('gss.admin.serviceable.unserviceable', compact('serviceable', 'divisions', 'sections'));
+    }
+
+    public function unserviceableUpdate(Request $request, $id)
+    {
+// Fetch the serviceable item by ID from the view
+$serviceable = DB::table('serviceable')->where('id', $id)->first();
+
+if (!$serviceable) {
+    return redirect()->back()->with('error', 'Serviceable item not found.');
+}
+
+$commonData = $request->except('_token', '_method');
+
+try {
+    DB::transaction(function () use ($serviceable, $commonData) {
+        if ($serviceable->source_table == 'add_record') {
+            DB::table('add_record')->where('id', $serviceable->id)->update(array_merge($commonData, ['status' => 'unserviceable']));
+        } else {
+            DB::table('equipment')->where('id', $serviceable->id)->update(array_merge($commonData, ['status' => 'unserviceable']));
+        }
+    });
+
+    return redirect()->route('gss.admin.list_serviceable')->with('success', 'Serviceable record updated successfully.');
+} catch (\Exception $e) {
+    return redirect()->back()->with('error', 'Error marking serviceable item as unserviceable: ' . $e->getMessage());
+}
     }
 
     public function unserviceable()

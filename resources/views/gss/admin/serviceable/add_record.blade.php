@@ -9,7 +9,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">Add Record</div>
-                <div class="card-body">
+                <div class="card-body"> 
 
                     <!-- @if(session('success'))
                     <div class="alert alert-success">
@@ -270,12 +270,9 @@
 $(document).ready(function() {
     $('#division').change(function() {
         var div_name = $(this).val();
-        var div_id = $(this).find(':selected').data('div-id');
-        $('#division_id').val(div_id);
-
         if (div_name) {
             $.ajax({
-                url: '{{ url("get-sections") }}/' + encodeURIComponent(div_name),
+                url: '{{ url("get-sections") }}/' + div_name,
                 type: "GET",
                 dataType: "json",
                 success: function(data) {
@@ -289,6 +286,7 @@ $(document).ready(function() {
             $('#section').empty();
         }
     });
+});
 
     //date_renewed
     $('#date_acquired, #lifespan').change(function() {
@@ -381,7 +379,6 @@ $(document).ready(function() {
 
     // Trigger generation on change
     $('#property_type, #category, #amount, #division, #office').change(generatePropertyNumber);
-});
 
 $(document).ready(function() {
     @if(session('success'))

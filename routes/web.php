@@ -61,11 +61,18 @@ Route::middleware(['auth', PreventBackHistory::class, CheckRoleAndOffice::class 
 
         Route::get('/{id}/transfer', [GssAdminController::class, 'transferServiceableForm'])->name('serviceables.transfer_serviceable');
         Route::put('/{id}/transfer', [GssAdminController::class, 'transferServiceable'])->name('serviceables.transfer');
+
+        Route::put('/serviceables/{serviceable}/unserviceable', [GssAdminController::class, 'unserviceableUpdate'])->name('serviceables.unserviceable');
+
+
+        Route::get('/{id}/unserviceable', [GssAdminController::class, 'unserviceableForm'])->name('serviceables.unserviceable_form');
+        Route::put('/{id}/unserviceable', [GssAdminController::class, 'unserviceableUpdate'])->name('serviceables.unserviceable_update');
     });
 
     Route::get('/generate-pdf/{propertyNumber}', [GssAdminController::class, 'generatePdf'])->name('generate.pdf');
     Route::get('/view-serviceable-template', [GssAdminController::class, 'viewServiceableTemplate'])->name('view-serviceable-template');
     Route::get('/get-sections/{div_name}', [GssAdminController::class, 'getSections']);
+    
 
     // Other routes
     Route::get('/unserviceable', [GssAdminController::class, 'unserviceable'])->name('gss.admin.unserviceable');
