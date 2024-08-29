@@ -16,3 +16,56 @@
     width: 100%;
     margin: 2px 0;
 }
+
+.dashboard-main-wrapper {
+    display: inline-table;
+    width: 100%;
+}
+
+.collapsing {
+    -webkit-transition: none;
+    transition: ease;
+    display: none;
+}
+
+/* General sidebar styles */
+.nav-sidebar .nav-item > .nav-link {
+    padding-left: 20px; /* Default padding for main menu items */
+}
+
+/* Specific styles for the nested submenus under "Request Forms" */
+.nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link {
+    padding-left: 60px; /* Increased padding for deeper submenus */
+}
+
+.nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link p {
+    white-space: normal;
+    text-indent: 0;
+    margin-left: 0;
+}
+
+.nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link i.nav-icon {
+    margin-right: 10px;
+}
+
+.menu-open .nav-treeview {
+    display: block;
+}
+
+.nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link {
+    height: auto;
+    line-height: 1.2;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.sidebar .nav-link p {
+    margin: 0;
+    padding: 0;
+}
+
+/* Ensure that the parent item with a submenu remains aligned */
+.nav-treeview > .nav-item > .nav-link > i.right {
+    margin-left: auto; /* Keep the arrow aligned to the right */
+}
+

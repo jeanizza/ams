@@ -21,7 +21,7 @@
     </style>
 </head>
 <body class="hold-transition sidebar-mini gss-admin">
-    <div id="app" class="wrapper">
+    <div id="app" class="wrapper dashboard-main-wrapper">
         <!-- Navbar -->
         @include('gss.admin.partials.navbar')
 

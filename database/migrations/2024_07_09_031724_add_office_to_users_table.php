@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('office')->after('email'); // Add office column after email
+            if (!Schema::hasColumn('users', 'office')) {
+                $table->string('office')->after('email');
+            }
         });
     }
 

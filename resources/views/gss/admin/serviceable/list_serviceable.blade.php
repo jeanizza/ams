@@ -62,28 +62,45 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-    var fetchUrl = @json(route('gss.admin.list_serviceable'));
-
-    $('#search').on('keyup', function() {
-        var query = $(this).val();
-        fetchServiceables(query);
-    });
-
-    function fetchServiceables(query = '') {
+    function fetch_data(page, query, sort_by, sort_direction) {
         $.ajax({
-            url: fetchUrl,
-            method: 'GET',
-            data: {search: query},
-            dataType: 'json',
-            success: function(data) {
-                $('#serviceable-table tbody').html(data.table_data);
-                $('#pagination-links').html(data.pagination);
+            url: "{{ route('gss.admin.list_serviceable') }}",
+            method: "GET",
+            data: {
+                page: page,
+                search: query,
+                sort_by: sort_by,
+                sort_direction: sort_direction
             },
-            error: function(xhr, status, error) {
-                console.error('AJAX Error:', status, error);
+            success: function(data) {
+                $('#table_data').html(data.table_data);
+                $('#pagination_links').html(data.pagination);
             }
         });
     }
+
+    $(document).on('keyup', '#search', function() {
+        var query = $('#search').val();
+        var sort_by = $('#sort_by').val();
+        var sort_direction = $('#sort_direction').val();
+        fetch_data(1, query, sort_by, sort_direction);
+    });
+
+    $(document).on('click', '.pagination a', function(event) {
+        event.preventDefault();
+        var page = $(this).attr('href').split('page=')[1];
+        var query = $('#search').val();
+        var sort_by = $('#sort_by').val();
+        var sort_direction = $('#sort_direction').val();
+        fetch_data(page, query, sort_by, sort_direction);
+    });
+
+    $(document).on('change', '#sort_by, #sort_direction', function() {
+        var query = $('#search').val();
+        var sort_by = $('#sort_by').val();
+        var sort_direction = $('#sort_direction').val();
+        fetch_data(1, query, sort_by, sort_direction);
+    });
 });
 </script>
 @endsection

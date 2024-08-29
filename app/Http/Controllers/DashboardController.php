@@ -27,9 +27,9 @@ class DashboardController extends Controller
             }
         } elseif ($user->div_name === 'Finance Division') {
             if ($user->role === 'admin') {
-                return redirect()->route('accounting.admin.dashboard');
+                return redirect()->route('finance.dashboard');
             } elseif ($user->role === 'user') {
-                return redirect()->route('accounting.user.dashboard');
+                return redirect()->route('dashboard');
             }
         }
 

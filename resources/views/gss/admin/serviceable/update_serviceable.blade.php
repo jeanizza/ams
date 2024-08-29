@@ -43,8 +43,8 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('serviceables.update', $serviceable->id) }}" enctype="multipart/form-data">
-                        @csrf
+                    <form method="POST" action="{{ route('serviceables.update', $serviceable->equipment_id) }}" enctype="multipart/form-data">    
+                    @csrf
                         @method('PUT')
 
                         <div class="form-group">

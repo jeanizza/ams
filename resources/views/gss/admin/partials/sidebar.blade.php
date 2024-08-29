@@ -39,16 +39,39 @@
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('gss.admin.unserviceable') }}" class="nav-link">
+                    <a href="{{ route('gss.admin.transferred_items') }}" class="nav-link">
+                        <i class="fas fa-exchange-alt nav-icon"></i>
+                        <p>Transferred Items</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('gss.admin.unserviceable_items') }}" class="nav-link">
                         <i class="nav-icon fas fa-times-circle"></i>
                         <p>Unserviceable</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ route('gss.admin.maintenance_ledger') }}" class="nav-link">
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-wrench"></i>
-                        <p>Maintenance Ledger</p>
+                        <p>
+                            Maintenance Ledger
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('gss.admin.add_maintenance_details') }}" class="nav-link">
+                                <i class="fas fa-plus-circle nav-icon"></i>
+                                <p>Add Maintenance Details</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gss.admin.ledger') }}" class="nav-link">
+                                <i class="fas fa-book nav-icon"></i>
+                                <p>View Ledger</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('gss.admin.reconciliation') }}" class="nav-link">

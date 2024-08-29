@@ -166,6 +166,7 @@ $(document).ready(function() {
                 dataType: "json",
                 success: function(data) {
                     $('#section').empty();
+                    $('#section').append('<option value="">Select Section</option>');
                     $.each(data, function(key, value) {
                         $('#section').append('<option value="'+ key +'">'+ value +'</option>');
                     });
@@ -173,9 +174,9 @@ $(document).ready(function() {
             });
         } else {
             $('#section').empty();
+            $('#section').append('<option value="">Select Section</option>');
         }
     });
 });
-
 </script>
 @endsection

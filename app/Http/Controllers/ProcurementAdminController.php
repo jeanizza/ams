@@ -10,6 +10,10 @@ class ProcurementAdminController extends Controller
     public function index()
     {
         $user = Auth::user();
-        return view('procurement.admin.dashboard', compact('user'));
+
+        $username = $user->username;
+
+        //return view('procurement.admin.dashboard', compact('user'));
+        return redirect()->to('http://localhost:8080/admin?username='.$username);
     }
 }

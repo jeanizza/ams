@@ -10,7 +10,7 @@
             <div class="card">
                 <div class="card-header">Unserviceable</div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('serviceables.unserviceable_update', $serviceable->id) }}">
+                    <form method="POST" action="{{ route('serviceables.unserviceable_update', $serviceable->equipment_id) }}">
                         @csrf
                         @method('PUT')
 

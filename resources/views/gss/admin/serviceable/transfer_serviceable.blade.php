@@ -10,7 +10,7 @@
             <div class="card">
                 <div class="card-header">Transfer Serviceable</div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('serviceables.transfer', $serviceable->id) }}">
+                    <form method="POST" action="{{ route('serviceables.transfer', $serviceable->equipment_id) }}">
                         @csrf
                         @method('PUT')
 

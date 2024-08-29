@@ -1,6 +1,6 @@
        @forelse ($serviceables as $serviceable)
             <tr>
-                <td>{{ $serviceable->id }}</td>
+                <td>{{ $serviceable->equipment_id }}</td>
                 <td>{{ $serviceable->property_number }}</td>
                 <td>{{ $serviceable->particular }}</td>
                 <td>{{ $serviceable->description }}</td>
@@ -21,13 +21,13 @@
                 </td>
                 <td>
                     <div>
-                        <a href="{{ route('serviceables.update_serviceable', $serviceable->id) }}" class="btn btn-success btn-sm">Update</a>
+                        <a href="{{ route('serviceables.update_serviceable', $serviceable->equipment_id) }}" class="btn btn-success btn-sm">Update</a>
                     </div>
                     <div>
-                        <a href="{{ route('serviceables.transfer_serviceable', $serviceable->id) }}" class="btn btn-warning btn-sm" style="background-color: #ffcc00; border-color: #ffcc00;">Transfer</a>
+                        <a href="{{ route('serviceables.transfer_serviceable', $serviceable->equipment_id) }}" class="btn btn-warning btn-sm" style="background-color: #ffcc00; border-color: #ffcc00;">Transfer</a>
                     </div>
                     <div>
-                        <a href="{{ route('serviceables.unserviceable_form', $serviceable->id) }}" class="btn btn-danger btn-sm">Unserviceable</a>
+                        <a href="{{ route('serviceables.unserviceable_form', $serviceable->equipment_id) }}" class="btn btn-danger btn-sm">Unserviceable</a>
                     </div>
                 </td>
             </tr>

@@ -66,4 +66,10 @@ class RegisterController extends Controller
 
         return redirect('/login')->with('success', 'Registration successful. Please login.');
     }
+
+    public function getSections($div_id)
+    {
+        $sections = Section::where('div_id', $div_id)->pluck('sec_name', 'sec_id');
+        return response()->json($sections);
+    }
 }

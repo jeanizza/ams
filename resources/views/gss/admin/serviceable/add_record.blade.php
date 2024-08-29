@@ -33,7 +33,8 @@
                                         <p>Record added successfully. Property Number: {{ session("propertyNumber") }}</p>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" id="download-pdf" class="btn btn-primary">Download PDF</button>
+                                        <!-- <button type="button" id="download-pdf" class="btn btn-primary">Download PDF</button> -->
+                                        <a href="{{ route('generate.pdf', session('propertyNumber')) }}" class="btn btn-primary" id="download-pdf">Download PDF</a>
                                         <button type="button" id="ok-button" class="btn btn-secondary" data-dismiss="modal">OK</button>
                                     </div>
                                 </div>
@@ -173,7 +174,7 @@
                                     <option value="{{ $division->div_name }}" data-div-id="{{ $division->div_id }}">{{ $division->div_name }}</option>
                                 @endforeach
                             </select>
-                            <input type="hidden" id="division_id" name="division_id">
+                            <input type="hidden" id="division_id" name="division_id" value="">
                         </div>
 
                         <!-- Section -->
@@ -236,10 +237,10 @@
                             </select>
                         </div>
 
-                        <!-- Date Renewed -->
+                        <!-- Date End -->
                         <div class="form-group">
-                            <label for="date_renewed">Date Terminous</label>
-                            <input type="text" class="form-control" id="date_renewed" name="date_renewed" readonly>
+                            <label for="date_end">Date Terminous</label>
+                            <input type="text" class="form-control" id="date_end" name="date_end" readonly>
                         </div>
 
                         <!-- Uploaded By -->
@@ -288,33 +289,33 @@ $(document).ready(function() {
     });
 });
 
-    //date_renewed
+    //date_end
     $('#date_acquired, #lifespan').change(function() {
         var dateAcquired = $('#date_acquired').val();
         var lifespan = $('#lifespan').val();
         if (dateAcquired && lifespan) {
-            var dateRenewed = moment(dateAcquired).add(lifespan, 'years').format('YYYY-MM-DD');
-            $('#date_renewed').val(dateRenewed);
+            var dateEnd = moment(dateAcquired).add(lifespan, 'years').format('YYYY-MM-DD');
+            $('#date_end').val(dateEnd);
         } else {
-            $('#date_renewed').val('');
+            $('#date_end').val('');
         }
     });
 
     //property_number
-    function generatePropertyNumber() {
-        let office = $('#office').val();
-        let propertyType = $('#property_type').val();
-        let category = $('#category').val();
+    function generatePropertyNumber(parCount, lvCount, hvCount) {
+        let office = $('#office').val() || '';
+        let propertyType = $('#property_type').val() || '';
+        let category = $('#category').val() || '';
         let amount = parseFloat($('#amount').val()) || 0;
-        let divisionId = $('#division_id').val();
+        let divisionId = $('#division_id').val() || '';
         let year = new Date().getFullYear();
-        
+
         // Determine LV or HV
         let lvhv = amount < 5000 ? "LV" : "HV";
-        
+
         // Extract category code
-        let categoryCode = category.substring(0, 2);
-        
+        let categoryCode = category ? category.substring(0, 2) : '';
+
         // Determine General Ledger Account
         let generalLedgerAccount = "00";
         if (category.includes("Buildings")) {
@@ -361,24 +362,48 @@ $(document).ready(function() {
         // Series number based on serviceable count
         let seriesNumber = "0000";
         if (propertyType === "PAR") {
-            seriesNumber = '{{ str_pad($parCount + 1, 4, "0", STR_PAD_LEFT) }}';
+            seriesNumber = String(parCount + 1).padStart(4, '0');
         } else {
-            seriesNumber = (lvhv === "LV" ? '{{ str_pad($lvCount + 1, 4, "0", STR_PAD_LEFT) }}' : '{{ str_pad($hvCount + 1, 4, "0", STR_PAD_LEFT) }}');
+            if (lvhv === "LV") {
+                seriesNumber = String(lvCount + 1).padStart(4, '0');
+            } else {
+                seriesNumber = String(hvCount + 1).padStart(4, '0');
+            }
         }
 
         // Construct property number
         let propertyNumber = "";
         if (propertyType === "PAR") {
-            propertyNumber = `${officeCode}-${year}-${categoryCode}-${generalLedgerAccount}-${seriesNumber}-${divisionId}`;
+            propertyNumber = `${officeCode}-${year}-${categoryCode}-${generalLedgerAccount}-${seriesNumber}-${divisionId}`.trim();
         } else if (propertyType === "ICS") {
-            propertyNumber = `${officeCode}-${lvhv}-${year}-${categoryCode}-${generalLedgerAccount}-${seriesNumber}-${divisionId}`;
+            propertyNumber = `${officeCode}-${lvhv}-${year}-${categoryCode}-${generalLedgerAccount}-${seriesNumber}-${divisionId}`.trim();
         }
 
+        console.log("Generated Property Number: ", propertyNumber + " (length: " + propertyNumber.length + ")");
         $('#property_number').val(propertyNumber);
     }
 
-    // Trigger generation on change
-    $('#property_type, #category, #amount, #division, #office').change(generatePropertyNumber);
+    // Trigger generation on change with dummy counts (replace these with actual counts)
+    $('#property_type, #category, #amount, #division, #office').change(function() {
+        generatePropertyNumber(
+            {{ $parCount ?? 0 }},
+            {{ $lvCount ?? 0 }},
+            {{ $hvCount ?? 0 }}
+        );
+    });
+
+    $('#division').change(function() {
+        let selectedOption = $(this).find('option:selected');
+        let divisionId = selectedOption.data('div-id');
+        let divisionName = selectedOption.val(); // Get the division name from the selected option
+        $('#division_id').val(divisionId); // Update hidden input with division name
+        console.log("Updated Division ID:", divisionId); // Log updated divisionId for debugging
+        generatePropertyNumber(
+            {{ $parCount ?? 0 }},
+            {{ $lvCount ?? 0 }},
+            {{ $hvCount ?? 0 }}
+        ); // Re-generate property number with new division ID
+    });
 
 $(document).ready(function() {
     @if(session('success'))
@@ -386,7 +411,9 @@ $(document).ready(function() {
 
         $('#download-pdf').click(function() {
             let propertyNumber = '{{ session("propertyNumber") }}';
-            window.location.href = '{{ url("/generate-pdf") }}/' + propertyNumber;
+            console.log("Property number in session: " + propertyNumber + " (length: " + propertyNumber.length + ")");
+            let encodedPropertyNumber = encodeURIComponent(propertyNumber);
+            window.location.href = '{{ url("/generate-pdf") }}/' + encodedPropertyNumber;
         });
 
         $('#ok-button').click(function() {

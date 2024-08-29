@@ -125,6 +125,4 @@ return [
 
     'mix_url' => env('APP_URL', 'http://ams.local/'),
 
-
-
 ];
