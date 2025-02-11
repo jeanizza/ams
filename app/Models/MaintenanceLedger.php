@@ -13,11 +13,11 @@ class MaintenanceLedger extends Model
     protected $primaryKey = 'maintenance_ledger_id';
     public $incrementing = false; // Disable auto-incrementing
     public $timestamps = false; // Disable timestamps
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'maintenance_ledger_id', 'property_number', 'date_created', 'quantity', 'unit', 
-        'particular', 'defects', 'po_number', 'supplier', 
-        'unit_cost', 'total_amount', 'remarks'
+        'maintenance_ledger_id', 'equipment_id', 'property_number', 'date_delivered','quantity','unit', 'particular_ledger', 'description_ledger', 
+        'defects', 'po_number', 'supplier', 'unit_cost', 'total_amount', 'remarks','date_created', 'date_updated'
     ];
 
     protected static function boot()

@@ -17,11 +17,28 @@
         </div>
     </div>
 
-    <!-- Include the table partial below the welcome box -->
-    <div class="row justify-content-center">
+    <!-- Flag Button to toggle visibility of the table -->
+    <div class="row mb-3">
+        <div class="col-md-12 text-right">
+            <button id="toggleDateEndTable" class="btn btn-warning">Toggle Equipment Near Date End Table</button>
+        </div>
+    </div>
+
+    <!-- Table to display Equipment Near Date End -->
+    <div class="row justify-content-center" id="dateEndTable">
         <div class="col-md-12">
             @include('gss.admin.table_date_end', ['equipmentItems' => $equipmentItems, 'divisions' => $divisions])
         </div>
     </div>
 </div>
+
+@section('scripts')
+<script>
+    $(document).ready(function() {
+        $('#toggleDateEndTable').click(function() {
+            $('#dateEndTable').toggle();
+        });
+    });
+</script>
+@endsection
 @endsection

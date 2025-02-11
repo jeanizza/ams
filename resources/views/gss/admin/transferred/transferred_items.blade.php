@@ -7,6 +7,7 @@
 <div class="container-fluid transferred-items">
     <div class="row justify-content-center">
         <div class="col-md-12">
+
             <!-- Statistics Section -->
             <div id="statistics">
                 <div class="row mb-4">
@@ -44,8 +45,19 @@
             </form>
 
             <div class="card">
-                <div class="card-header">Transferred Items</div>
+            <div class="card-header">
+                <p>Total Transferred Items: {{ $totalTransferredCount }}</p>
+            </div>
                 <div class="card-body">
+
+                <!-- Flash Messages -->
+                @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    
                     <!-- Search Form -->
                     <form method="GET" action="{{ route('gss.admin.transferred_items') }}" id="search-form">
                         <div class="input-group mb-3">
@@ -60,9 +72,13 @@
                                 <th>Property Number</th>
                                 <th>Particular</th>
                                 <th>Description</th>
-                                <th>Office</th>
-                                <th>Division</th>
+                                <th>From End User</th>
+                                <th>From Office</th>
+                                <th>To Office</th>
+                                <th>To End User</th>
                                 <th>Amount</th>
+                                <th>Upload Image</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="table_data">

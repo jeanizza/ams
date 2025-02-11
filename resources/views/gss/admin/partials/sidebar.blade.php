@@ -19,7 +19,7 @@
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-clipboard-list"></i>
                         <p>
-                            Inventory Management
+                            Serviceable
                             <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>  
@@ -33,7 +33,7 @@
                         <li class="nav-item">
                             <a href="{{ route('gss.admin.list_serviceable') }}" class="nav-link">
                                 <i class="fas fa-edit nav-icon circle-icon"></i>
-                                <p>Update</p>
+                                <p>List of Serviceable</p>
                             </a>
                         </li>
                     </ul>
@@ -50,34 +50,40 @@
                         <p>Unserviceable</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('gss.admin.ledger') }}" class="nav-link">
+                        <i class="nav-icon fas fa-wrench"></i>
+                        <p>Maintenance Ledger</p>
+                    </a>
+                </li>
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-wrench"></i>
+                        <i class="nav-icon fas fa-sync-alt"></i>
                         <p>
-                            Maintenance Ledger
+                            Items Reconciliation
                             <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('gss.admin.add_maintenance_details') }}" class="nav-link">
-                                <i class="fas fa-plus-circle nav-icon"></i>
-                                <p>Add Maintenance Details</p>
+                            <a href="{{ route('gss.admin.reconciliation') }}" class="nav-link">
+                                <i class="fas fa-tools nav-icon"></i>
+                                <p>Reconcile Items</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('gss.admin.ledger') }}" class="nav-link">
-                                <i class="fas fa-book nav-icon"></i>
-                                <p>View Ledger</p>
+                            <a href="{{ route('gss.admin.add_disposal_value') }}" class="nav-link">
+                                <i class="fas fa-hand-holding-usd nav-icon"></i>
+                                <p>Add Disposal Value</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gss.admin.disposal_details') }}" class="nav-link">
+                                <i class="fas fa-file-alt nav-icon"></i>
+                                <p>Disposal Details</p>
                             </a>
                         </li>
                     </ul>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('gss.admin.reconciliation') }}" class="nav-link">
-                        <i class="nav-icon fas fa-balance-scale"></i>
-                        <p>Reconciliation</p>
-                    </a>
                 </li>
             </ul>
         </nav>

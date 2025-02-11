@@ -59,6 +59,13 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login')->with('status', 'You have been logged out!');
+         // Expire the username cookie
+        return redirect('/login')->with('status', 'You have been logged out!')->withCookie(cookie()->forget('username'));
+    }
+
+    protected function authenticated(Request $request, $user)
+    {
+        // Set a cookie for the username
+        return redirect()->intended($this->redirectPath())->withCookie(cookie('username', $user->username, 60));  // Cookie valid for 60 minutes
     }
 }

@@ -43,22 +43,53 @@
                     @endif
 
                     <form action="{{ route('gss.admin.store_add_record') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <!-- Property Type -->
-                        <div class="form-group">
-                            <label for="property_type">Property Type</label>
-                            <select class="form-control" id="property_type" name="property_type" required>
-                                <option value="" disabled selected hidden>Choose an Option</option>
-                                <option value="PAR">Property Acknowledgment Receipt</option>
-                                <option value="ICS">Inventory Custodian Slip</option>
-                            </select>
-                        </div>
+                    @csrf
 
-                        <!-- Property Number -->
-                        <div class="form-group">
-                            <label for="property_number">Property Number</label>
-                            <input type="text" class="form-control" id="property_number" name="property_number" readonly required>
-                        </div>
+                    <!-- Property Type Dropdown -->
+                    <div class="form-group">
+                        <label for="property_type">Property Type</label>
+                        <select class="form-control" id="property_type" name="property_type" required>
+                            <option value="" disabled selected hidden>Select Property Type</option>
+                            <option value="PAR">PAR</option>
+                            <option value="ICS">ICS</option>
+                        </select>
+                    </div>
+
+                    <!-- High Value / Low Value Dropdown -->
+                    <div class="form-group" id="value_type_group" style="display: none;">
+                        <label for="value_type">Value Type</label>
+                        <select class="form-control" id="value_type" name="value_type">
+                            <option value="" disabled selected hidden>Select Value Type</option>
+                            <option value="High Value">High Value</option>
+                            <option value="Low Value">Low Value</option>
+                        </select>
+                    </div>
+
+                    <!-- Year Dropdown -->
+                    <div class="form-group">
+                        <label for="year">Year</label>
+                        <select class="form-control" id="year" name="year" required>
+                            <option value="" disabled selected hidden>Select Year</option>
+                            @foreach($years as $year)
+                                <option value="{{ $year }}">{{ $year }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Counter Display -->
+                    <div class="form-group">
+                        <label>Counter Result</label>
+                        <div id="counter_result" class="badge badge-primary">Count: 0</div>
+                    </div>
+                    
+
+                    
+
+                    <!-- Property Number -->
+                    <div class="form-group">
+                        <label for="property_number">Property Number</label>
+                        <input type="text" class="form-control" id="property_number" name="property_number" required>
+                    </div>
 
                         <!-- Category -->
                         <div class="form-group">
@@ -260,6 +291,30 @@
                     </form>
                 </div>
             </div>
+
+
+            <!-- Error Modal -->
+            <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title" id="errorModalLabel">Validation Error</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Error message will be injected dynamically -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
         </div>
     </div>
 </div>
@@ -270,19 +325,16 @@
 <script>
 $(document).ready(function() {
     $('#division').change(function() {
-        var div_name = $(this).val();
-        if (div_name) {
-            $.ajax({
-                url: '{{ url("get-sections") }}/' + div_name,
-                type: "GET",
-                dataType: "json",
-                success: function(data) {
-                    $('#section').empty();
-                    $.each(data, function(key, value) {
-                        $('#section').append('<option value="'+ value +'">'+ value +'</option>');
-                    });
-                }
-            });
+        const divName = $(this).val();
+        if (divName) {
+            const url = '{{ route("fetch.sections", ":division") }}'.replace(':division', divName);
+
+            $.get(url, function(data) {
+                $('#section').empty().append('<option>Select Section</option>');
+                data.forEach(section => {
+                    $('#section').append(`<option value="${section}">${section}</option>`);
+                });
+            }).fail(() => alert('Failed to fetch sections.'));
         } else {
             $('#section').empty();
         }
@@ -301,109 +353,161 @@ $(document).ready(function() {
         }
     });
 
-    //property_number
-    function generatePropertyNumber(parCount, lvCount, hvCount) {
-        let office = $('#office').val() || '';
-        let propertyType = $('#property_type').val() || '';
-        let category = $('#category').val() || '';
-        let amount = parseFloat($('#amount').val()) || 0;
-        let divisionId = $('#division_id').val() || '';
-        let year = new Date().getFullYear();
-
-        // Determine LV or HV
-        let lvhv = amount < 5000 ? "LV" : "HV";
-
-        // Extract category code
-        let categoryCode = category ? category.substring(0, 2) : '';
-
-        // Determine General Ledger Account
-        let generalLedgerAccount = "00";
-        if (category.includes("Buildings")) {
-            generalLedgerAccount = "01";
-        } else if (category.includes("Hostel & Dorm")) {
-            generalLedgerAccount = "06";
-        } else if (category.includes("Office Equipment")) {
-            generalLedgerAccount = "02";
-        } else if (category.includes("ICT")) {
-            generalLedgerAccount = "03";
-        } else if (category.includes("Agricultural & Forestry")) {
-            generalLedgerAccount = "04";
-        } else if (category.includes("Marine & Fishery")) {
-            generalLedgerAccount = "05";
-        } else if (category.includes("Communication")) {
-            generalLedgerAccount = "07";
-        } else if (category.includes("Technical & Scientific")) {
-            generalLedgerAccount = "14";
-        } else if (categoryCode === "06") {
-            generalLedgerAccount = "99";
-        }
-
-        // Determine office code
-        let officeCode = "XX";
-        switch (office) {
-            case "Regional Office": officeCode = "RX"; break;
-            case "PENRO Camiguin": officeCode = "PC"; break;
-            case "PENRO Bukidnon": officeCode = "PB"; break;
-            case "CENRO Don Carlos": officeCode = "CD"; break;
-            case "CENRO Manolo Fortich": officeCode = "CM"; break;
-            case "CENRO Talakag": officeCode = "CT"; break;
-            case "CENRO Valencia": officeCode = "CV"; break;
-            case "PENRO Lanao del Norte": officeCode = "PL"; break;
-            case "CENRO Iligan": officeCode = "CIG"; break;
-            case "CENRO Kolambugan": officeCode = "CK"; break;
-            case "PENRO Misamis Occidental": officeCode = "PMC"; break;
-            case "CENRO Oroquieta": officeCode = "COR"; break;
-            case "CENRO Ozamiz": officeCode = "COZ"; break;
-            case "PENRO Misamis Oriental": officeCode = "PMR"; break;
-            case "CENRO Gingoog": officeCode = "CG"; break;
-            case "CENRO Initao": officeCode = "CIN"; break;
-        }
-
-        // Series number based on serviceable count
-        let seriesNumber = "0000";
-        if (propertyType === "PAR") {
-            seriesNumber = String(parCount + 1).padStart(4, '0');
+    $(document).ready(function () {
+    // Show or hide Value Type dropdown based on Property Type selection
+    $('#property_type').change(function () {
+        const propertyType = $(this).val();
+        if (propertyType === 'ICS') {
+            $('#value_type_group').show();
         } else {
-            if (lvhv === "LV") {
-                seriesNumber = String(lvCount + 1).padStart(4, '0');
-            } else {
-                seriesNumber = String(hvCount + 1).padStart(4, '0');
-            }
+            $('#value_type_group').hide();
+            $('#value_type').val(''); // Reset value type if not ICS
         }
+        updateCounter(); // Update the counter when the property type changes
+    });
 
-        // Construct property number
-        let propertyNumber = "";
-        if (propertyType === "PAR") {
-            propertyNumber = `${officeCode}-${year}-${categoryCode}-${generalLedgerAccount}-${seriesNumber}-${divisionId}`.trim();
-        } else if (propertyType === "ICS") {
-            propertyNumber = `${officeCode}-${lvhv}-${year}-${categoryCode}-${generalLedgerAccount}-${seriesNumber}-${divisionId}`.trim();
+    // Update Counter Display when Value Type or Year dropdown changes
+    $('#value_type, #year').change(function () {
+        updateCounter();
+    });
+
+    // Function to update the counter
+    function updateCounter() {
+        const propertyType = $('#property_type').val(); // Get selected property type
+        const valueType = $('#value_type').val(); // Get selected value type
+        const year = $('#year').val(); // Get selected year
+
+        // Check if property type and year are selected
+        if (propertyType && year) {
+            $.ajax({
+                url: '{{ route("fetch.counters") }}', // Route to fetch counter
+                type: 'GET',
+                data: { property_type: propertyType, value_type: valueType, year: year }, // Data to send
+                success: function (response) {
+                    if (response && response.count !== undefined) {
+                        $('#counter_result').text(`Count: ${response.count}`);
+                    } else {
+                        $('#counter_result').text('Count: 0');
+                    }
+                },
+                error: function () {
+                    $('#counter_result').text('Count: 0'); // Default on error
+                }
+            });
+        } else {
+            $('#counter_result').text('Count: 0'); // Default if inputs are invalid
         }
+    }
+});
 
-        console.log("Generated Property Number: ", propertyNumber + " (length: " + propertyNumber.length + ")");
-        $('#property_number').val(propertyNumber);
+    // Enhanced Property Number Generation
+function generatePropertyNumber(parCount, lvCount, hvCount) {
+    const office = $('#office').val() || '';
+    const propertyType = $('#property_type').val() || '';
+    const category = $('#category').val() || '';
+    const amount = parseFloat($('#amount').val()) || 0;
+    const divisionId = $('#division_id').val() || '';
+    const currentDate = new Date();
+    const startDate = new Date('2025-01-22');
+    const year = startDate.getFullYear();
+
+    // Determine LV or HV
+    let lvhv = 'LV';
+    if (amount >= 5000 && amount <= 49999.99) {
+        lvhv = 'HV';
     }
 
-    // Trigger generation on change with dummy counts (replace these with actual counts)
-    $('#property_type, #category, #amount, #division, #office').change(function() {
-        generatePropertyNumber(
-            {{ $parCount ?? 0 }},
-            {{ $lvCount ?? 0 }},
-            {{ $hvCount ?? 0 }}
-        );
-    });
+    // Extract category code
+    const categoryCode = category ? category.substring(0, 2) : '';
 
-    $('#division').change(function() {
-        let selectedOption = $(this).find('option:selected');
-        let divisionId = selectedOption.data('div-id');
-        let divisionName = selectedOption.val(); // Get the division name from the selected option
-        $('#division_id').val(divisionId); // Update hidden input with division name
-        console.log("Updated Division ID:", divisionId); // Log updated divisionId for debugging
-        generatePropertyNumber(
-            {{ $parCount ?? 0 }},
-            {{ $lvCount ?? 0 }},
-            {{ $hvCount ?? 0 }}
-        ); // Re-generate property number with new division ID
-    });
+    // Determine General Ledger Account
+    const generalLedgerAccount = determineGeneralLedgerAccount(category);
+
+    // Determine office code
+    const officeCode = determineOfficeCode(office);
+
+    // Calculate series number based on the counts
+    let seriesNumber = '0000';
+    if (propertyType === 'PAR') {
+        seriesNumber = String(parCount + 1).padStart(4, '0');
+    } else if (lvhv === 'LV') {
+        seriesNumber = String(lvCount + 1).padStart(4, '0');
+    } else {
+        seriesNumber = String(hvCount + 1).padStart(4, '0');
+    }
+
+    // Construct the property number
+    let propertyNumber = '';
+    if (propertyType === 'PAR') {
+        propertyNumber = `${officeCode}-${year}-${categoryCode}-${generalLedgerAccount}-${seriesNumber}-${divisionId}`.trim();
+    } else if (propertyType === 'ICS') {
+        propertyNumber = `${officeCode}-${lvhv}-${year}-${categoryCode}-${generalLedgerAccount}-${seriesNumber}-${divisionId}`.trim();
+    }
+
+    // Debugging logs
+    console.log('Generated Property Number:', propertyNumber);
+    console.log('Amount:', amount, '| LV/HV:', lvhv);
+
+    // Update the property number field
+    $('#property_number').val(propertyNumber);
+}
+
+// General Ledger Account Determination
+function determineGeneralLedgerAccount(category) {
+    if (category.includes('Buildings')) return '01';
+    if (category.includes('Hostel & Dorm')) return '06';
+    if (category.includes('Office Equipment')) return '02';
+    if (category.includes('ICT')) return '03';
+    if (category.includes('Agricultural & Forestry')) return '04';
+    if (category.includes('Marine & Fishery')) return '05';
+    if (category.includes('Communication')) return '07';
+    if (category.includes('Technical & Scientific')) return '14';
+    if (category.startsWith('06')) return '99';
+    return '00';
+}
+
+// Office Code Determination
+function determineOfficeCode(office) {
+    const officeCodes = {
+        'Regional Office': 'RX',
+        'PENRO Camiguin': 'PC',
+        'PENRO Bukidnon': 'PB',
+        'CENRO Don Carlos': 'CD',
+        'CENRO Manolo Fortich': 'CM',
+        'CENRO Talakag': 'CT',
+        'CENRO Valencia': 'CV',
+        'PENRO Lanao del Norte': 'PL',
+        'CENRO Iligan': 'CIG',
+        'CENRO Kolambugan': 'CK',
+        'PENRO Misamis Occidental': 'PMC',
+        'CENRO Oroquieta': 'COR',
+        'CENRO Ozamiz': 'COZ',
+        'PENRO Misamis Oriental': 'PMR',
+        'CENRO Gingoog': 'CG',
+        'CENRO Initao': 'CIN',
+    };
+    return officeCodes[office] || 'XX';
+}
+
+// Event Listeners
+$('#property_type, #category, #amount, #division, #office').change(function () {
+    generatePropertyNumber(
+        {{ $parCount ?? 0 }},
+        {{ $lvCount ?? 0 }},
+        {{ $hvCount ?? 0 }}
+    );
+});
+
+$('#division').change(function () {
+    const selectedOption = $(this).find('option:selected');
+    const divisionId = selectedOption.data('div-id');
+    $('#division_id').val(divisionId);
+    generatePropertyNumber(
+        {{ $parCount ?? 0 }},
+        {{ $lvCount ?? 0 }},
+        {{ $hvCount ?? 0 }}
+    );
+});
 
 $(document).ready(function() {
     @if(session('success'))

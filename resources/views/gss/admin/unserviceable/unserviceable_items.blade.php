@@ -7,6 +7,7 @@
 <div class="container-fluid unserviceable-items">
     <div class="row justify-content-center">
         <div class="col-md-12">
+
             <!-- Statistics Section -->
             <div id="statistics">
                 <div class="row mb-4">
@@ -26,6 +27,7 @@
                             </div>
                         </div>
                     </div>
+                  
                 </div>
             </div>
 
@@ -44,15 +46,27 @@
             </form>
 
             <div class="card">
-                <div class="card-header">Unserviceable Items</div>
+                <div class="card-header">
+                    <p>Total Unserviceable Items: {{ $unserviceableItems->total() }}</p>
+                </div>
                 <div class="card-body">
+
+                    <!-- Flash Messages -->
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
                     <!-- Search Form -->
                     <form method="GET" action="{{ route('gss.admin.unserviceable_items') }}" id="search-form">
                         <div class="input-group mb-3">
-                            <input type="text" name="search" id="search" class="form-control" placeholder="Search" value="{{ request()->get('search') }}">
+                            <input type="text" name="search" id="search" class="form-control" placeholder="Search by Property Number or End User" value="{{ request()->get('search') }}">
                         </div>
                     </form>
 
+                    <!-- Table -->
                     <table class="table table-bordered" id="unserviceable-items-table">
                         <thead>
                             <tr>
@@ -60,9 +74,15 @@
                                 <th>Property Number</th>
                                 <th>Particular</th>
                                 <th>Description</th>
-                                <th>Office</th>
+                                <th>End User</th>
                                 <th>Division</th>
+                                <th>Date Acquired</th>
+                                <th>Lifespan</th>
                                 <th>Amount</th>
+                                <th>Condition</th>
+                                <th>Unserviceable Image</th>
+                                <th>Returned Date</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="table_data">

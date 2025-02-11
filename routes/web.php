@@ -36,13 +36,13 @@ Route::middleware(['auth', CheckRole::class . ':admin', PreventBackHistory::clas
 Route::middleware(['auth', CheckRole::class . ':user', PreventBackHistory::class])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
 
-     // General Services routes under UserController
-    Route::get('/user/general-services/defects-and-complaints-form', [UserController::class, 'defectsAndComplaintsForm'])->name('user.general-services.defects_and_complaints_form');
+    // General Services routes under UserController
+    Route::get('/user/general-services/defects-and-complaints-form/{id?}', [UserController::class, 'defectsAndComplaintsForm'])->name('user.general-services.defects_and_complaints_form');
 
-    Route::get('/user/general-services/job-request-form', [UserController::class, 'jobRequestForm'])->name('user.general-services.job_request_form');
+    Route::get('/user/general-services/job-request-form/{id?}', [UserController::class, 'jobRequestForm'])->name('user.general-services.job_request_form');  // Make sure this route is defined
     Route::post('/user/general-services/job-request-form', [UserController::class, 'storeJobRequestForm'])->name('user.general-services.store_job_request_form');
 
-    Route::get('/user/general-services/returned-unserviceable-form', [UserController::class, 'returnedUnserviceableForm'])->name('user.general-services.returned_unserviceable_form');
+    Route::get('/user/general-services/returned-unserviceable-form/{id?}', [UserController::class, 'returnedUnserviceableForm'])->name('user.general-services.returned_unserviceable_form');
     Route::post('/user/general-services/returned-unserviceable-form', [UserController::class, 'storeReturnedUnserviceableForm'])->name('user.general-services.store_returned_unserviceable_form');
 
     Route::get('/user/general-services/gate-pass-form', [UserController::class, 'gatePassForm'])->name('user.general-services.gate_pass_form');
@@ -55,8 +55,7 @@ Route::middleware(['auth', CheckRole::class . ':user', PreventBackHistory::class
     Route::get('/user/get-equipment-details', [UserController::class, 'getEquipmentDetails'])->name('user.getEquipmentDetails');
 
     Route::post('/user/general-services/store-defects-and-complaints-form', [UserController::class, 'storeDefectsAndComplaintsForm'])->name('user.general-services.store_defects_and_complaints_form');
-    Route::post('/user/general-services/job-request', [UserController::class, 'storeJobRequest'])->name('user.general-services.store_job_request_form');
-    
+    Route::post('/user/general-services/job-request', [UserController::class, 'storeJobRequest'])->name('user.general-services.store_job_request');
 });
 
 // Routes for Procurement Admin
@@ -87,6 +86,8 @@ Route::middleware(['auth', PreventBackHistory::class, CheckRoleAndOffice::class 
 
         Route::get('/{id}/unserviceable', [GssAdminController::class, 'unserviceableForm'])->name('serviceables.unserviceable_form');
         Route::put('/{id}/unserviceable', [GssAdminController::class, 'unserviceableUpdate'])->name('serviceables.unserviceable_update');
+
+        Route::get('/fetch-counters', [GssAdminController::class, 'fetchCounters'])->name('fetch.counters');
     });
 
     // Transferred Items route
@@ -98,21 +99,40 @@ Route::middleware(['auth', PreventBackHistory::class, CheckRoleAndOffice::class 
 
     // Maintenance Ledger routes with sub-menu
     Route::prefix('gss/admin/maintenance')->group(function () {
-        Route::get('/add-details', [GssAdminController::class, 'addMaintenanceDetails'])->name('gss.admin.add_maintenance_details');
-        Route::post('/add-details', [GssAdminController::class, 'storeMaintenanceDetails'])->name('gss.admin.store_maintenance_details');
+        Route::get('/add-details/{maintenance_ledger_id?}', [GssAdminController::class, 'addMaintenanceDetails'])->name('gss.admin.add_maintenance_details');
+        Route::post('/store-details', [GssAdminController::class, 'storeMaintenanceDetails'])->name('gss.admin.store_maintenance_details');
+        Route::put('/update/{maintenance_ledger_id}', [GssAdminController::class, 'updateMaintenanceDetails'])->name('gss.admin.update_maintenance_details');
+        Route::post('/maintenance/process-waste-material', [GssAdminController::class, 'processWasteMaterial'])->name('gss.admin.process_waste_material');
         Route::get('/property-numbers', [GssAdminController::class, 'getPropertyNumbers'])->name('gss.admin.property_numbers');
         Route::get('/ledger', [GssAdminController::class, 'ledger'])->name('gss.admin.ledger');
         Route::get('/ledger/search', [GssAdminController::class, 'searchLedger'])->name('gss.admin.ledger.search');
     });
 
+
     Route::get('/generate-pdf/{propertyNumber}', [GssAdminController::class, 'generatePdf'])->name('generate.pdf');
     Route::get('/preview-pdf/{propertyNumber}', [GssAdminController::class, 'previewPdf'])->name('preview.pdf');
     Route::get('/view-serviceable-template', [GssAdminController::class, 'viewServiceableTemplate'])->name('view-serviceable-template');
-    Route::get('/get-sections/{div_name}', [GssAdminController::class, 'getSections']);
+   // Route::get('/get-sections/{div_name}', [GssAdminController::class, 'getSections']);
+    Route::get('/get-sections/{div_name}', [GssAdminController::class, 'getSections'])->name('fetch.sections');
 
     // Other routes
     Route::get('/unserviceable', [GssAdminController::class, 'unserviceable'])->name('gss.admin.unserviceable');
+
     Route::get('/reconciliation', [GssAdminController::class, 'reconciliation'])->name('gss.admin.reconciliation');
+    Route::get('/gss/admin/export-excel', [GssAdminController::class, 'exportExcel'])->name('gss.admin.exportExcel');
+
+    
+    Route::get('/add-disposal-value', [GssAdminController::class, 'addDisposalValue'])->name('gss.admin.add_disposal_value');
+    Route::post('/add-disposal-value/store', [GssAdminController::class, 'storeDisposalValue'])->name('gss.admin.store_disposal_value');
+
+
+    Route::get('/gss/admin/disposal-details', [GssAdminController::class, 'disposalDetails'])->name('gss.admin.disposal_details');
+    Route::get('/gss/admin/export-disposal', [GssAdminController::class, 'exportToExcel'])->name('gss.admin.exportDisposal');
+
+
+
+
+
 });
 
 // Routes for General Services User
@@ -127,6 +147,12 @@ Route::middleware(['auth', PreventBackHistory::class, CheckRoleAndOffice::class 
     Route::post('/finance/update-reconcile', [FinanceController::class, 'updateReconcile'])->name('finance.update_reconcile');
     Route::post('/finance/add-reconcile', [FinanceController::class, 'addReconcile'])->name('finance.add_reconcile');
     Route::get('/finance/equipment-near-end', [FinanceController::class, 'equipmentNearEnd'])->name('finance.equipment_near_end');
+
+    Route::get('/finance/add-carrying-value', [FinanceController::class, 'addCarryingValue'])->name('finance.add_carrying_value');
+    Route::post('/finance/add-carrying-value/store', [FinanceController::class, 'storeCarryingValue'])->name('finance.store_carrying_value');
+    Route::get('/finance/disposal-details', [FinanceController::class, 'disposalDetails'])->name('finance.disposal_details');
+
+    
 });
 
 // Route for fetching sections accessible during registration

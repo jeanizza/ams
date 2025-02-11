@@ -32,7 +32,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('user.general-services.store_job_request_form') }}">
+                    <form method="POST" action="{{ route('user.general-services.job_request_form') }}">
                         @csrf
 
                         <div class="form-container">

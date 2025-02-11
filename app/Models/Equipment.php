@@ -14,13 +14,48 @@ class Equipment extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'property_type', 'property_number', 'category', 'status', 'particular', 'description', 'brand', 'model', 'serial_no',
-        'amount', 'date_acquired', 'po_number', 'end_user', 'position', 'office','division', 'section',
-        'actual_user', 'position_actual_user', 'remarks', 'fund', 'lifespan', 'date_end', 'upload_image', 'uploaded_by'
+        'property_type',
+        'property_number',
+        'reference_no',
+        'category',
+        'status',
+        'office',
+        'particular',
+        'description',
+        'serial_no',
+        'model',
+        'brand',
+        'amount',
+        'qty',
+        'total_amount',
+        'po_number',
+        'date_acquired',
+        'end_user',
+        'position',
+        'section',
+        'division',
+        'actual_user',
+        'position_actual_user',
+        'equipment_location',
+        'remarks',
+        'transferred_to',
+        'fund',
+        'lifespan',
+        'date_end',
+        'date_renewed',
+        'date_entered',
+        'officeOfActualUser',
+        'officeOfEndUser',
+        'upload_image',
+        'uploaded_by',
+        'updated_by',
+        'date_updated',
+        'request_id',
     ];
 
     protected $casts = [
         'amount' => 'float', // cast the amount field to float
+        'lifespan' => 'integer',
     ];
 
     // Relationship to Division

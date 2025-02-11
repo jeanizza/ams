@@ -23,24 +23,10 @@
                             <label for="property_number">Property Number</label>
                             <input type="text" class="form-control" id="property_number" name="property_number" value="{{ $serviceable->property_number }}" readonly>
                         </div>
-
+                    
                         <div class="form-group">
-                            <label for="category">Category</label>
-                            <select class="form-control" id="category" name="category" disabled>
-                                <option value="05-Agricultural & Forestry Equipment" {{ $serviceable->category == '05-Agricultural & Forestry Equipment' ? 'selected' : '' }}>05-Agricultural & Forestry Equipment</option>
-                                <option value="05-Buildings" {{ $serviceable->category == '05-Buildings' ? 'selected' : '' }}>05-Buildings</option>
-                                <option value="05-Communication Equipment" {{ $serviceable->category == '05-Communication Equipment' ? 'selected' : '' }}>05-Communication Equipment</option>
-                                <option value="05-Construction Equipment" {{ $serviceable->category == '05-Construction Equipment' ? 'selected' : '' }}>05-Construction Equipment</option>
-                                <option value="06-Furniture & Fixtures" {{ $serviceable->category == '06-Furniture & Fixtures' ? 'selected' : '' }}>06-Furniture & Fixtures</option>
-                                <option value="05-Information & Communication Technology Equipment (ICT)" {{ $serviceable->category == '05-Information & Communication Technology Equipment (ICT)' ? 'selected' : '' }}>05-Information & Communication Technology Equipment</option>
-                                <option value="05-Marine & Fishery Equipment" {{ $serviceable->category == '05-Marine & Fishery Equipment' ? 'selected' : '' }}>05-Marine & Fishery Equipment</option>
-                                <option value="05-Office Equipment" {{ $serviceable->category == '05-Office Equipment' ? 'selected' : '' }}>05-Office Equipment</option>
-                                <option value="05-Other Land Improvements" {{ $serviceable->category == 'example_category' ? 'selected' : '' }}>05-Other Land Improvements</option>
-                                <option value="05-Sports Equipment" {{ $serviceable->category == 'example_category' ? 'selected' : '' }}>05-Sports Equipment</option>
-                                <option value="05-Technical & Scientific Equipment" {{ $serviceable->category == 'example_category' ? 'selected' : '' }}>05-Technical & Scientific Equipment</option>
-                                <option value="06-Transportation Equipment" {{ $serviceable->category == 'example_category' ? 'selected' : '' }}>06-Transportation Equipment</option>
-                                <option value="05-Watercrafts Equipment" {{ $serviceable->category == 'example_category' ? 'selected' : '' }}>05-Watercrafts Equipment</option>
-                            </select>
+                        <label for="category">Category</label>
+                        <input type="text" class="form-control" id="category" name="category" value="{{ $serviceable->category }}" readonly>
                         </div>
 
                         <div class="form-group">
@@ -70,7 +56,8 @@
 
                         <div class="form-group">
                             <label for="amount">Amount</label>
-                            <input type="number" class="form-control" id="amount" name="amount" step="0.01" value="{{ isset($serviceable->amount) ? str_replace(',', '', $serviceable->amount) : '' }}" readonly>
+                            <input type="text" class="form-control" id="amount" name="amount" 
+                                value="{{ isset($serviceable->amount) ? number_format($serviceable->amount, 2) : '' }}" readonly>
                         </div>
                         
                         <div class="form-group">
@@ -80,106 +67,52 @@
 
                         <div class="form-group">
                             <label for="date_acquired">Date Acquired</label>
-                            <input type="date" class="form-control" id="date_acquired" name="date_acquired" value="{{ $serviceable->date_acquired }}">
+                            <input type="date" class="form-control" id="date_acquired" name="date_acquired" value="{{ $serviceable->date_acquired }}" readonly>
                         </div>
 
                         <div class="form-group">
                             <label for="end_user">End User</label>
-                            <input type="text" class="form-control" id="end_user" name="end_user" value="{{ $serviceable->end_user }}">
+                            <input type="text" class="form-control" id="end_user" name="end_user" value="{{ $serviceable->end_user }}" readonly>
                         </div>
 
                         <div class="form-group">
                             <label for="position">Position</label>
-                            <input type="text" class="form-control" id="position" name="position" value="{{ $serviceable->position }}">
+                            <input type="text" class="form-control" id="position" name="position" value="{{ $serviceable->position }}" readonly>
                         </div>
 
                         <div class="form-group">
                             <label for="office">Office</label>
-                            <!-- <input type="text" class="form-control" id="office" name="office" value="{{ $serviceable->office }}" > -->
-                            <select class="form-control" id="office" name="office" required>
-                                <option value="Regional Office" {{ $serviceable->office == 'Regional Office' ? 'selected' : '' }}>Regional Office</option>
-                                <option value="PENRO Camiguin" {{ $serviceable->office == 'PENRO Camiguin' ? 'selected' : '' }}>PENRO Camiguin</option>
-                                <option value="PENRO Bukidnon" {{ $serviceable->office == 'PENRO Bukidnon' ? 'selected' : '' }}>PENRO Bukidnon</option>
-                                <option value="CENRO Don Carlos" {{ $serviceable->office == 'CENRO Don Carlos' ? 'selected' : '' }}>CENRO Don Carlos</option>
-                                <option value="CENRO Manolo Fortich" {{ $serviceable->office == 'CENRO Manolo Fortich' ? 'selected' : '' }}>CENRO Manolo Fortich</option>
-                                <option value="CENRO Talakag" {{ $serviceable->office == 'CENRO Talakag' ? 'selected' : '' }}>CENRO Talakag</option>
-                                <option value="CENRO Valencia" {{ $serviceable->office == 'CENRO Valencia' ? 'selected' : '' }}>CENRO Valencia</option>
-                                <option value="PENRO Lanao del Norte" {{ $serviceable->office == 'PENRO Lanao del Norte' ? 'selected' : '' }}>PENRO Lanao del Norte</option>
-                                <option value="CENRO Iligan" {{ $serviceable->office == 'CENRO Iligan' ? 'selected' : '' }}>CENRO Iligan</option>
-                                <option value="CENRO Kolambugan" {{ $serviceable->office == 'CENRO Kolambugan' ? 'selected' : '' }}>CENRO Kolambugan</option>
-                                <option value="PENRO Misamis Occidental" {{ $serviceable->office == 'PENRO Misamis Occidental' ? 'selected' : '' }}>PENRO Misamis Occidental</option>
-                                <option value="CENRO Oroquieta" {{ $serviceable->office == 'CENRO Oroquieta' ? 'selected' : '' }}>CENRO Oroquieta</option>
-                                <option value="CENRO Ozamis" {{ $serviceable->office == 'CENRO Ozamis' ? 'selected' : '' }}>CENRO Ozamis</option>
-                                <option value="PENRO Misamis Oriental" {{ $serviceable->office == 'PENRO Misamis Oriental' ? 'selected' : '' }}>PENRO Misamis Oriental</option>
-                                <option value="CENRO Gingoog" {{ $serviceable->office == 'CENRO Gingoog' ? 'selected' : '' }}>CENRO Gingoog</option>
-                                <option value="CENRO Initao" {{ $serviceable->office == 'CENRO Initao' ? 'selected' : '' }}>CENRO Initao</option>
-                            </select>
+                            <input type="text" class="form-control" id="office" name="office" value="{{ $serviceable->office }}" readonly>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="division">Division</label>
-                                <select class="form-control" id="division" name="division">
-                                    @foreach($divisions->chunk($divisions->count()/2) as $chunk)
-                                        @foreach($chunk as $division)
-                                            <option value="{{ $division->div_name }}" {{ $serviceable->division == $division->div_name ? 'selected' : '' }}>
-                                                {{ $division->div_name }}
-                                            </option>
-                                        @endforeach
-                                    @endforeach
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            <label for="division">Division</label>
+                            <input type="text" class="form-control" id="division" name="division" value="{{ $serviceable->division }}" readonly>
+                        </div>
 
-                            <div class="form-group col-md-6">
-                                <label for="section">Section</label>
-                                <select class="form-control" id="section" name="section">
-                                    @foreach($sections->chunk($sections->count()/2) as $chunk)
-                                        @foreach($chunk as $section)
-                                            <option value="{{ $section->sec_name }}" {{ $serviceable->section == $section->sec_name ? 'selected' : '' }}>
-                                                {{ $section->sec_name }}
-                                            </option>
-                                        @endforeach
-                                    @endforeach
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            <label for="section">Section</label>
+                            <input type="text" class="form-control" id="section" name="section" value="{{ $serviceable->section }}" readonly>
                         </div>
 
                         <div class="form-group">
                             <label for="remarks">Remarks</label>
-                            <select class="form-control" id="remarks" name="remarks" disabled>
-                                <option value="purchased" {{ $serviceable->remarks == 'purchased' ? 'selected' : '' }}>Purchased</option>
-                                <option value="central office fund" {{ $serviceable->remarks == 'central office fund' ? 'selected' : '' }}>Central Office Fund</option>
-                                <option value="field office fund" {{ $serviceable->remarks == 'field office fund' ? 'selected' : '' }}>Field Office Fund</option>
-                            </select>
+                            <input type="text" class="form-control" id="remarks" name="remarks" value="{{ $serviceable->remarks }}" readonly>
                         </div>
 
                         <div class="form-group">
                             <label for="fund">Fund Source</label>
-                            <select class="form-control" id="fund" name="fund" disabled>
-                                <option value="101" {{ $serviceable->fund == '101' ? 'selected' : '' }}>101</option>
-                                <option value="102" {{ $serviceable->fund == '102' ? 'selected' : '' }}>102</option>
-                                <option value="158" {{ $serviceable->fund == '158' ? 'selected' : '' }}>158</option>
-                                <option value="401" {{ $serviceable->fund == '401' ? 'selected' : '' }}>401</option>
-                                <option value="trust fund" {{ $serviceable->fund == 'trust fund' ? 'selected' : '' }}>Trust Fund</option>
-                                <option value="not applicable" {{ $serviceable->fund == 'not applicable' ? 'selected' : '' }}>Not Applicable</option>
-                            </select>
+                            <input type="text" class="form-control" id="fund" name="fund" value="{{ $serviceable->fund }}" readonly>
                         </div>
 
                         <div class="form-group">
                             <label for="lifespan">Estimated Useful Life</label>
-                            <select class="form-control" id="lifespan" name="lifespan" disabled>
-                                <option value="2" {{ $serviceable->lifespan == '2' ? 'selected' : '' }}>2</option>
-                                <option value="3" {{ $serviceable->lifespan == '3' ? 'selected' : '' }}>3</option>
-                                <option value="5" {{ $serviceable->lifespan == '5' ? 'selected' : '' }}>5</option>
-                                <option value="7" {{ $serviceable->lifespan == '7' ? 'selected' : '' }}>7</option>
-                                <option value="10" {{ $serviceable->lifespan == '10' ? 'selected' : '' }}>10</option>
-                                <option value="15" {{ $serviceable->lifespan == '15' ? 'selected' : '' }}>15</option>
-                            </select>
+                            <input type="text" class="form-control" id="lifespan" name="lifespan" value="{{ $serviceable->lifespan }}" readonly>
                         </div>
 
                         <div class="form-group">
-                            <label for="date_renewed">Date Terminous</label>
-                            <input type="text" class="form-control" id="date_renewed" name="date_renewed" value="{{ $serviceable->date_renewed }}" readonly>
+                            <label for="date_end">Date Terminous</label>
+                            <input type="text" class="form-control" id="date_end" name="date_end" value="{{ $serviceable->date_end }}" readonly>
                         </div>
 
                         <div class="form-group">
@@ -197,40 +130,55 @@
                             @endif
                         </div>
 
+                        <!-- Transfer Details -->
+                        <div class="form-group">
+                        <label for="transfer_office">Transfer to Office</label>
+                        <select class="form-control" id="transfer_office" name="transfer_office" required>
+                            <option value="" disabled selected hidden>Select Office</option>
+                            @foreach($offices as $office)
+                                <option value="{{ $office }}" 
+                                        {{ isset($transfer->transfer_office) && $transfer->transfer_office == $office ? 'selected' : '' }}>
+                                    {{ $office }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                         <div class="form-group">
                             <label for="transfer_enduser">Transfer To</label>
-                            <input type="text" class="form-control" id="transfer_enduser" name="transfer_enduser">
+                            <input type="text" class="form-control" id="transfer_enduser" name="transfer_enduser" 
+                                value="{{ isset($transfer->transfer_enduser) ? $transfer->transfer_enduser : '' }}">
                         </div>
 
                         <div class="form-group">
                             <label for="transfer_position">Position</label>
-                            <input type="text" class="form-control" id="transfer_position" name="transfer_position">
+                            <input type="text" class="form-control" id="transfer_position" name="transfer_position" 
+                                value="{{ isset($transfer->transfer_position) ? $transfer->transfer_position : '' }}">
                         </div>
 
                         <div class="form-group">
                             <label for="transfer_condition">Condition</label>
-                            <select class="form-control" id="transfer_condition" name="transfer_condition" >
-                                <option value="" disabled selected hidden>Choose an Option</option>
-                                <option value="Serviceable">Serviceable</option>
-                                <option value="Brand New">Brand New</option>
-                                <option value="Slightly Used">Slightly Used</option>
+                            <select class="form-control" id="transfer_condition" name="transfer_condition">
+                                <option value="" disabled selected hidden>Select Condition</option>
+                                <option value="Serviceable" {{ isset($transfer->transfer_condition) && $transfer->transfer_condition == 'Serviceable' ? 'selected' : '' }}>Serviceable</option>
+                                <option value="Brand New" {{ isset($transfer->transfer_condition) && $transfer->transfer_condition == 'Brand New' ? 'selected' : '' }}>Brand New</option>
+                                <option value="Slightly Used" {{ isset($transfer->transfer_condition) && $transfer->transfer_condition == 'Slightly Used' ? 'selected' : '' }}>Slightly Used</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label for="reason_transfer">Reason</label>
-                            <textarea type="text" class="form-control" id="reason_transfer" name="reason_transfer"></textarea>
+                            <textarea class="form-control" id="reason_transfer" name="reason_transfer">{{ isset($transfer->reason_transfer) ? $transfer->reason_transfer : '' }}</textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="date_transfer">Date Transfer</label>
-                            <input type="date" class="form-control" id="date_transfer" name="date_transfer">
+                            <input type="date" class="form-control" id="date_transfer" name="date_transfer" 
+                                value="{{ isset($transfer->date_transfer) ? $transfer->date_transfer : '' }}">
                         </div>
 
-
-
-                        <button type="submit" class="btn btn-primary">Transfer</button>
-                        <a href="{{ route('gss.admin.list_serviceable') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">{{ isset($transfer) ? 'Update' : 'Transfer' }}</button>
+                        <a href="{{ route('gss.admin.transferred_items') }}" class="btn btn-secondary">Cancel</a>
                     </form>
                 </div>
             </div>
@@ -264,18 +212,6 @@ $(document).ready(function() {
         }
     });
 
-  /*  // Calculate and set date renewed
-    $('#date_acquired, #lifespan').change(function() {
-        var dateAcquired = $('#date_acquired').val();
-        var lifespan = $('#lifespan').val();
-        if (dateAcquired && lifespan) {
-            var dateRenewed = moment(dateAcquired).add(lifespan, 'years').format('YYYY-MM-DD');
-            $('#date_renewed').val(dateRenewed);
-        } else {
-            $('#date_renewed').val('');
-        }
-    });
-  */  
 
     // Show success modal and handle PDF download
     @if(session('success'))
@@ -289,5 +225,17 @@ $(document).ready(function() {
         });
     @endif
 });
+
+$(document).ready(function() {
+        // Get the current office value
+        const currentOffice = '{{ $serviceable->office }}';
+
+        // Remove the current office from the transfer_office dropdown
+        $('#transfer_office option').each(function() {
+            if ($(this).val() === currentOffice) {
+                $(this).remove();
+            }
+        });
+    });
 </script>
 @endsection

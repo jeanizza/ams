@@ -49,6 +49,7 @@
                         <p>Procurement Services</p>
                     </a>
                 </li>
+                <!--
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-shopping-cart fa-lg"></i>
@@ -72,11 +73,35 @@
                         </li>
                     </ul>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ route('finance.reconcile_items') }}" class="nav-link">
-                        <i class="fas fa-file-invoice-dollar nav-icon"></i>
-                        <p>Reconcile</p>
+                -->
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-sync-alt"></i>
+                        <p>
+                            Items Reconciliation
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('finance.reconcile_items') }}" class="nav-link">
+                                <i class="fas fa-tools nav-icon"></i>
+                                <p>Reconcile Items</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('finance.add_carrying_value') }}" class="nav-link">
+                                <i class="fas fa-hand-holding-usd nav-icon"></i>
+                                <p>Add Carrying Value</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('finance.disposal_details') }}" class="nav-link">
+                                <i class="fas fa-file-alt nav-icon"></i>
+                                <p>Disposal Details</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </nav>

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 use App\Models\JobRequest;
 use App\Models\ComplaintDefect;
@@ -18,16 +19,45 @@ class UserController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $today = now()->startOfDay();
-        $dateLimit = $today->copy()->addDays(15);
+        $division = $user->div_name; // Fetch the correct division
+        $equipmentItems = $this->fetchEquipmentNearEnd($user->office, $division);
+        $equipmentCount = $equipmentItems->count();
 
-        // Query to get equipment where date_end is within 15 days and division matches the user's division
+        return view('user.dashboard', compact('user', 'equipmentItems', 'equipmentCount'));
+    }
+
+    public function equipmentNearEnd(Request $request)
+    {
+        $user = Auth::user();
+        $division = $user->div_name; 
+        $equipmentItems = $this->fetchEquipmentNearEnd($user->office, $division);
+
+        return view('user.dashboard.equipment_near_end', compact('equipmentItems'));
+    }
+
+    private function fetchEquipmentNearEnd($office, $division)
+    {
+        $dateFrom = Carbon::now();
+        $dateTo = Carbon::now()->addDays(15);  // Adjust to 15 days as per your original request
+    
+        // Fetch equipment items matching the user's office and division, and date_end within 15 days from today
         $equipmentItems = DB::table('equipment')
-            ->where('division', $user->div_name)
-            ->whereBetween('date_end', [$today, $dateLimit])
-            ->get();
-
-        return view('user.dashboard', compact('user', 'equipmentItems'));
+            ->where('office', $office)
+            ->where('division', $division)
+            ->where(function($query) use ($dateFrom, $dateTo) {
+                $query->whereBetween('date_end', [$dateFrom, $dateTo])
+                      ->orWhere('date_end', '<', $dateFrom);
+            })
+            ->where('status', 'serviceable')
+            ->orderBy('date_end', 'ASC')  // Ensure items are ordered by date_end ascending
+            ->paginate(20);  // Paginate with 20 items per page
+    
+        foreach ($equipmentItems as $item) {
+            $item->remarks = 'For Update';
+            $item->request = 'Unserviceable';  // Assuming this is part of the status or another field
+        }
+    
+        return $equipmentItems;
     }
 
     public function defectsAndComplaintsForm()
@@ -35,8 +65,9 @@ class UserController extends Controller
         return view('user.user-gss.defects_and_complaints_form');
     }
 
-    public function jobRequestForm()
+    public function jobRequestForm($id = null)
     {
+        // Your logic here
         return view('user.user-gss.job_request_form');
     }
 
@@ -47,12 +78,80 @@ class UserController extends Controller
 
     public function inventory()
     {
-        return view('user.user-gss.inventory');
+        $user = Auth::user();
+        $division = $user->div_name; // Fetch the division name of the logged-in user
+
+        // Fetch serviceable items for the user's division
+        $serviceables = DB::table('equipment')
+            ->where('status', 'serviceable')
+            ->where('division', $division)
+            ->when(request()->get('search'), function ($query) {
+                $search = request()->get('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('property_number', 'like', "%$search%")
+                        ->orWhere('particular', 'like', "%$search%")
+                        ->orWhere('description', 'like', "%$search%");
+                });
+            })
+            ->paginate(20);
+
+        return view('user.user-gss.inventory', compact('serviceables'));
+
     }
 
-    public function viewRequest()
+    public function viewRequest(Request $request)
     {
-        return view('user.user-gss.view_request');
+        $user = Auth::user();
+        $division = $user->div_name;
+        $search = $request->get('search');
+
+        // Fetch data from unserviceable table
+        $unserviceable = DB::table('unserviceable')
+            ->select('id', 'property_number', 'item_description as description', 'status', DB::raw("'unserviceable' as source"))
+            ->where(function($query) use ($division, $search) {
+                $query->where('status', 'Pending')
+                    ->orWhereNull('status')
+                    ->orWhere('status', '');
+                if ($search) {
+                    $query->where('property_number', 'LIKE', "%$search%")
+                        ->orWhere('item_description', 'LIKE', "%$search%");
+                }
+            })
+            ->where('division', $division);
+
+        // Fetch data from job_requests table
+        $jobRequests = DB::table('job_requests')
+            ->select('id', 'name as property_number', 'job_description as description', 'status', DB::raw("'job_requests' as source"))
+            ->where(function($query) use ($division, $search) {
+                $query->where('status', 'Pending')
+                    ->orWhereNull('status')
+                    ->orWhere('status', '');
+                if ($search) {
+                    $query->where('name', 'LIKE', "%$search%")
+                        ->orWhere('job_description', 'LIKE', "%$search%");
+                }
+            })
+            ->where('division', $division);
+
+        // Fetch data from complaints_defects table
+        $complaintsDefects = DB::table('complaints_defects')
+            ->select('complaints_defects_id as id', 'property_number', 'complaints as description', 'status', DB::raw("'complaints_defects' as source"))
+            ->where(function($query) use ($division, $search) {
+                $query->where('status', 'Pending')
+                    ->orWhereNull('status')
+                    ->orWhere('status', '');
+                if ($search) {
+                    $query->where('property_number', 'LIKE', "%$search%")
+                        ->orWhere('complaints', 'LIKE', "%$search%");
+                }
+            })
+            ->where('division', $division);
+
+        // Union the queries together
+        $requests = $unserviceable->union($jobRequests)->union($complaintsDefects)->orderBy('id', 'desc')->paginate(20);
+        
+        
+        return view('user.user-gss.view_request', compact('requests'));
     }
 
     public function getEquipmentDetails(Request $request)
@@ -208,6 +307,8 @@ class UserController extends Controller
             return redirect()->back()->withErrors('Failed to save the unserviceable item. Please try again.');
         }
     }
+
+     
     
     
 }

@@ -36,6 +36,7 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th>No</th>
                                     <th>Property Number</th>
                                     <th>Office</th>
                                     <th>Date End</th>
@@ -45,6 +46,7 @@
                             <tbody>
                                 @foreach($equipmentItems as $item)
                                     <tr>
+                                        <td>{{ ($equipmentItems->currentPage() - 1) * $equipmentItems->perPage() + $loop->iteration }}</td>
                                         <td>{{ $item->property_number }}</td>
                                         <td>{{ $item->office }}</td>
                                         <td>{{ $item->date_end }}</td>
@@ -57,6 +59,11 @@
                                 @endforeach
                             </tbody>
                         </table>
+
+                        <div class="d-flex justify-content-center">
+                            {{ $equipmentItems->links() }}
+                        </div>
+
                     @endif
                 </div>
             </div>

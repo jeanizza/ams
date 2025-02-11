@@ -1,16 +1,16 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="#" class="brand-link">
+    <a href="{{ url('/') }}" class="brand-link">
         <span class="brand-text font-weight-light">DENR-X AMS</span>
     </a>
 
     <!-- Sidebar -->
     <div class="sidebar">
-      
-
         <!-- Sidebar Menu -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                
+                <!-- Laravel Dashboard -->
                 <li class="nav-item">
                     <a href="{{ route('user.dashboard') }}" class="nav-link">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -18,7 +18,7 @@
                     </a>
                 </li>
 
-                <!-- General Services Menu -->
+                <!-- Laravel General Services Menu -->
                 <li class="nav-item {{ request()->routeIs('user.general-services.*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('user.general-services.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-cogs"></i>
@@ -61,13 +61,6 @@
                                         <p>Receipt of Returned Unserviceable Form</p>
                                     </a>
                                 </li>
-                                <!--
-                                <li class="nav-item">
-                                    <a href="{{ route('user.general-services.gate_pass_form') }}" class="nav-link {{ request()->routeIs('user.general-services.gate_pass_form') ? 'active' : '' }}">
-                                        <p>Gate Pass Form</p>
-                                    </a>
-                                </li>
-                                -->
                             </ul>
                         </li>
 
@@ -80,12 +73,77 @@
                         </li>
                     </ul>
                 </li>
-                
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
+
+                <!-- Procurement Services (Main Menu) -->
+                <li class="nav-item {{ request()->is('user/procurement*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('user/procurement*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-shopping-cart"></i>
-                        <p>Procurement Services</p>
+                        <p>
+                            Procurement Services
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
+
+                    <!-- Submenu: CodeIgniter List, Logbook, Services -->
+                    <ul class="nav nav-treeview">
+                        <!-- Lists for PRs and POs -->
+                        <li class="nav-item">
+                            <a href="{{ url('http://localhost/ams_psts/user/pr') }}" class="nav-link">
+                                <i class="nav-icon fas fa-file"></i>
+                                <p>Purchase Requests</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('http://localhost/ams_psts/user/po') }}" class="nav-link">
+                                <i class="nav-icon fas fa-clipboard"></i>
+                                <p>Purchase Orders</p>
+                            </a>
+                        </li>
+
+                        <!-- Logbook -->
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-book"></i>
+                                <p>Logbook<i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ url('/user/receiving') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-arrow-right"></i>
+                                        <p>Receiving</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url('/user/releasing') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-arrow-left"></i>
+                                        <p>Releasing</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Procurement Services -->
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-cog"></i>
+                                <p>Services<i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ url('/user/ppmp') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-folder"></i>
+                                        <p>PPMP</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url('/user/suppliers') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-store"></i>
+                                        <p>Suppliers</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </nav>
@@ -93,35 +151,7 @@
     <!-- /.sidebar -->
 </aside>
 
+<!-- Blade styling -->
 <style>
-/* Ensure that submenu items under "Request Forms" are properly indented and aligned */
-.nav-treeview > .nav-item > .nav-link {
-    padding-left: 40px; /* Adjust padding to control the indentation */
-}
-
-.nav-treeview > .nav-item > .nav-link p {
-    white-space: normal; /* Allow text to wrap */
-    text-indent: 0;  /* Remove negative indent */
-    margin-left: 0; /* Align text directly under the icon */
-}
-
-.nav-treeview > .nav-item > .nav-link i.nav-icon {
-    margin-right: 10px; /* Add space between the icon and the text */
-}
-
-.menu-open .nav-treeview {
-    display: block; /* Ensure submenu stays expanded when active */
-}
-
-.nav-treeview > .nav-item > .nav-link {
-    height: auto; /* Allow height to adjust to content */
-    line-height: 1.2; /* Adjust line height for better spacing */
-    padding-top: 8px;
-    padding-bottom: 8px;
-}
-
-.sidebar .nav-link p {
-    margin: 0;
-    padding: 0;
-}
+/* Same as your existing styles */
 </style>

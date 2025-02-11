@@ -104,7 +104,7 @@ class FinanceController extends Controller
             'totalAmountPPE',
             'search'
         ));
-    }
+    } 
 
     public function updateReconcile(Request $request)
     {
@@ -180,5 +180,62 @@ class FinanceController extends Controller
         }
 
         return $equipmentItems;
+    }
+
+    public function addCarryingValue()
+    {
+        // Get all property numbers that are already in the carrying_value table
+        $existingPropertyNumbers = DB::table('carrying_value')->pluck('property_number')->toArray();
+
+        // Fetch data from the unserviceable table where the property_number is not in the carrying_value table
+        $unserviceableRecords = DB::table('unserviceable')
+            ->whereNotIn('property_number', $existingPropertyNumbers)
+            ->where('status', 'Acted')
+            ->paginate(20);
+
+        // Return the view with the fetched data
+        return view('finance.reconcile.add_carrying_value', compact('unserviceableRecords'));
+    }
+
+    public function storeCarryingValue(Request $request)
+    {
+        $request->validate([
+            'carrying_value' => 'required|numeric',
+            'property_number' => 'required|string',
+            'unserviceable_id' => 'required|integer',
+        ]);
+
+        DB::table('carrying_value')->insert([
+            'property_number' => $request->input('property_number'),
+            'carrying_value' => $request->input('carrying_value'),
+            'unserviceable_id' => $request->input('unserviceable_id'),
+        ]);
+
+        return redirect()->route('finance.add_carrying_value')->with('success', 'Carrying value added successfully.');
+    }
+
+    public function disposalDetails()
+    {
+        // Fetch data from the equipment, disposal_value, and carrying_value tables
+        $disposalDetails = DB::table('equipment')
+            ->join('disposal_value', 'equipment.property_number', '=', 'disposal_value.property_number')
+            ->join('carrying_value', 'equipment.property_number', '=', 'carrying_value.property_number')
+            ->select(
+                'equipment.property_type',
+                'equipment.property_number',
+                'equipment.particular',
+                'equipment.description',
+                'equipment.division',
+                'equipment.amount',
+                'equipment.po_number',
+                'equipment.date_acquired',
+                'equipment.date_end',
+                'disposal_value.disposal_value',
+                'carrying_value.carrying_value'
+            )
+            ->get();
+
+        // Return the view with the fetched data
+        return view('finance.disposal_details', compact('disposalDetails'));
     }
 }

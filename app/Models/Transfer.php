@@ -9,7 +9,7 @@ class Transfer extends Model
 {
     use HasFactory;
 
-    protected $table = 'transfer_data';
+    protected $table = 'transfer_serviceable';
     protected $primaryKey = 'transfer_id';
     public $incrementing = false;
     protected $keyType = 'string';
