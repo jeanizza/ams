@@ -153,10 +153,12 @@
                             <label for="division">Division</label>
                             <select class="form-control" id="division" name="division">
                                 @foreach($divisions as $division)
-                                    <option value="{{ $division->div_name }}" {{ $serviceable->division == $division->div_name ? 'selected' : '' }}>
+                                    <option value="{{ $division->div_name }}" 
+                                        {{ strtoupper($serviceable->division) == strtoupper($division->div_name) ? 'selected' : '' }}>
                                         {{ $division->div_name }}
                                     </option>
                                 @endforeach
+
                             </select>
                         </div>
 
@@ -164,7 +166,7 @@
                             <label for="section">Section</label>
                             <select class="form-control" id="section" name="section">
                                 @foreach($sections as $section)
-                                    <option value="{{ $section->sec_name }}" {{ $serviceable->section == $section->sec_name ? 'selected' : '' }}>
+                                    <option value="{{ $section->sec_name }}" {{ trim($serviceable->section) == trim($section->sec_name) ? 'selected' : '' }}>
                                         {{ $section->sec_name }}
                                     </option>
                                 @endforeach
@@ -254,7 +256,7 @@ $(document).ready(function() {
     $('#division').change(function() {
         const divName = $(this).val();
         if (divName) {
-            const url = '{{ route("fetch.sections", ":division") }}'.replace(':division', divName);
+            const url = '{{ route("fetch.sections", ":division") }}'.replace(':division', encodeURIComponent(divName));
 
             $.get(url, function(data) {
                 $('#section').empty().append('<option>Select Section</option>');

@@ -14,7 +14,7 @@
                 </td>
                 <td>
                     @if($serviceable->upload_image)
-                        <img src="{{ asset('storage/' . $serviceable->upload_image) }}" alt="Image" style="width: 100px; height: 100px; object-fit: cover;">
+                        <img src="{{ asset('storage/' . $serviceable->upload_image) }}" alt="Image" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
                     @else
                         No image
                     @endif

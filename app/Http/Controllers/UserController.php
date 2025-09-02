@@ -13,18 +13,70 @@ use App\Models\ComplaintDefect;
 use App\Models\Equipment;
 use App\Models\Unserviceable;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ServiceableExport;
+
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $division = $user->div_name; // Fetch the correct division
-        $equipmentItems = $this->fetchEquipmentNearEnd($user->office, $division);
-        $equipmentCount = $equipmentItems->count();
+        $division = $user->div_name; 
+
+        // Get property numbers that are 'Pending' or 'Approved' in request tables
+        $excludedPropertyNumbers = DB::table('request_update')
+            ->whereIn('status', ['Pending', 'Approved']) // Exclude both Pending and Approved
+            ->pluck('property_number')
+            ->merge(
+                DB::table('request_transfer')
+                    ->whereIn('status', ['Pending', 'Approved'])
+                    ->pluck('property_number')
+            )
+            ->merge(
+                DB::table('request_unserviceable')
+                    ->whereIn('status', ['Pending', 'Approved'])
+                    ->pluck('property_number')
+            )
+            ->unique()
+            ->toArray();
+
+        // Base query: Fetch equipment that is "serviceable" and near expiration
+        $query = DB::table('equipment')
+            ->where('office', $user->office)
+            ->where('division', $division)
+            ->where('status', 'serviceable')
+            ->where(function ($query) {
+                $query->where('date_end', '<', Carbon::now()) // Already expired
+                    ->orWhereBetween('date_end', [Carbon::now(), Carbon::now()->addDays(15)]); // Expiring soon
+            })
+            ->whereNotIn('property_number', $excludedPropertyNumbers); // Exclude Pending and Approved requests
+
+        // Apply live search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('property_number', 'like', "%$search%")
+                ->orWhere('particular', 'like', "%$search%")
+                ->orWhere('end_user', 'like', "%$search%");
+            });
+        }
+
+        // If the request is AJAX, return JSON response (for live search)
+        if ($request->ajax()) {
+            return response()->json($query->orderBy('date_end', 'ASC')->get());
+        }
+
+        // Normal page load (return view with paginated results)
+        $equipmentItems = $query->orderBy('date_end', 'ASC')->paginate(20);
+        $equipmentCount = $equipmentItems->total();
 
         return view('user.dashboard', compact('user', 'equipmentItems', 'equipmentCount'));
     }
+
+
+
+
 
     public function equipmentNearEnd(Request $request)
     {
@@ -38,27 +90,247 @@ class UserController extends Controller
     private function fetchEquipmentNearEnd($office, $division)
     {
         $dateFrom = Carbon::now();
-        $dateTo = Carbon::now()->addDays(15);  // Adjust to 15 days as per your original request
-    
-        // Fetch equipment items matching the user's office and division, and date_end within 15 days from today
+        $dateTo = Carbon::now()->addDays(15);
+        $fiveYearsAgo = Carbon::now()->subYears(5);
+
+        // Get property numbers already present in request tables within the last 5 years
+        $excludedPropertyNumbers = DB::table('request_update')
+            ->whereBetween('date_created', [$fiveYearsAgo, $dateFrom])
+            ->pluck('property_number')
+            ->merge(
+                DB::table('request_transfer')
+                    ->whereBetween('date_created', [$fiveYearsAgo, $dateFrom])
+                    ->pluck('property_number')
+            )
+            ->merge(
+                DB::table('request_unserviceable')
+                    ->whereBetween('date_created', [$fiveYearsAgo, $dateFrom])
+                    ->pluck('property_number')
+            )
+            ->unique()
+            ->toArray();
+
+        // Fetch equipment items matching conditions, excluding already requested property_numbers
         $equipmentItems = DB::table('equipment')
             ->where('office', $office)
             ->where('division', $division)
-            ->where(function($query) use ($dateFrom, $dateTo) {
+            ->where(function ($query) use ($dateFrom, $dateTo) {
                 $query->whereBetween('date_end', [$dateFrom, $dateTo])
-                      ->orWhere('date_end', '<', $dateFrom);
+                    ->orWhere('date_end', '<', $dateFrom);
             })
             ->where('status', 'serviceable')
-            ->orderBy('date_end', 'ASC')  // Ensure items are ordered by date_end ascending
-            ->paginate(20);  // Paginate with 20 items per page
-    
-        foreach ($equipmentItems as $item) {
-            $item->remarks = 'For Update';
-            $item->request = 'Unserviceable';  // Assuming this is part of the status or another field
-        }
-    
+            ->whereNotIn('property_number', $excludedPropertyNumbers) // Exclude already requested items
+            ->orderBy('date_end', 'ASC')
+            ->paginate(20);
+
+        
         return $equipmentItems;
     }
+
+    public function requestTransfer($id)
+    {
+        $equipment = Equipment::findOrFail($id);
+        return view('user.requests.request_transfer', compact('equipment'));
+    }
+
+    public function storeTransferRequest(Request $request, $id)
+    {
+        // Validate all required fields
+        $request->validate([
+            'property_number' => 'required|string|max:255',
+            'transfer_office' => 'required|string|max:255',
+            'transfer_enduser' => 'required|string|max:255',
+            'transfer_position' => 'required|string|max:255',
+            'reason_transfer' => 'required|string',
+        ]);
+
+        // Insert transfer request
+        DB::table('request_transfer')->insert([
+            'equipment_id' => $id,
+            'property_number' => $request->property_number,
+            'transfer_office' => $request->transfer_office,
+            'transfer_enduser' => $request->transfer_enduser,
+            'transfer_position' => $request->transfer_position,
+            'reason_transfer' => $request->reason_transfer,
+            'status' => 'Pending',
+            'date_created' => now(),
+        ]);
+
+        return redirect()->route('user.dashboard')->with('success', 'Transfer request submitted.');
+    }
+
+
+    public function requestUpdate($id)
+    {
+        $equipment = Equipment::findOrFail($id);
+        return view('user.requests.request_update', compact('equipment'));
+    }
+
+    public function storeUpdateRequest(Request $request, $id) 
+    {
+        // Validate the input
+        $request->validate([
+            'property_number' => 'required|string|max:255',
+            'division' => 'required|string|max:255',
+            'section' => 'required|string|max:255',
+            'reasons' => 'required|string',
+           
+        ]);
+
+        // Retrieve the equipment record
+        $equipment = Equipment::findOrFail($id);
+
+        // Insert into the `request_update` table
+        DB::table('request_update')->insert([
+            'equipment_id' => $equipment->equipment_id,
+            'property_number' => $request->property_number,
+            'division' => $request->division,
+            'section' => $request->section,
+            'reasons' => $request->reasons,
+            'status' => 'Pending',
+            'date_created' => now(),
+        ]);
+
+        
+        return redirect()->route('user.dashboard')->with('success', 'Equipment update request submitted successfully.');
+    }
+
+    public function requestUnserviceable($id)
+    {
+        // Fetch equipment details with error handling
+        $equipment = Equipment::where('equipment_id', $id)->first();
+
+        if (!$equipment) {
+            return redirect()->route('user.dashboard')->with('error', 'Equipment not found.');
+        }
+
+        return view('user.requests.request_unserviceable', compact('equipment'));
+    }
+
+    public function storeUnserviceableRequest(Request $request, $id)
+    {
+        // Fetch equipment details
+        $equipment = Equipment::where('equipment_id', $id)->first();
+
+        if (!$equipment) {
+            return redirect()->route('user.dashboard')->with('error', 'Equipment not found.');
+        }
+
+        // Validate required fields
+        $request->validate([
+            'unserviceable_condition' => 'required|string|max:255',
+        ]);
+
+        // Try to insert into request_unserviceable table
+        try {
+            DB::table('request_unserviceable')->insert([
+                'equipment_id' => $id,
+                'property_number' => $equipment->property_number, // ✅ Fixed: Get from DB
+                'end_user' => $equipment->end_user, // ✅ Fixed: Get from DB
+                'unserviceable_condition' => $request->unserviceable_condition,
+                'status' => 'Pending',
+                'date_created' => now(),
+            ]);
+
+            return redirect()->route('user.dashboard')->with('success', 'Unserviceable request submitted.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to submit the request. Please try again.');
+        }
+    }
+
+
+    public function inventory(Request $request)
+{
+    $user = Auth::user();
+    $office = $user->office;
+    $division = $user->div_name;
+
+    // ✅ Base Query
+    $query = Equipment::where('status', 'serviceable')
+        ->where('office', 'like', '%' . $office . '%')
+        ->where('division', 'like', '%' . $division . '%');
+
+    // ✅ Apply Filters
+    if ($request->filled('search')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('property_number', 'like', "%{$request->search}%")
+                ->orWhere('particular', 'like', "%{$request->search}%")
+                ->orWhere('description', 'like', "%{$request->search}%")
+                ->orWhere('end_user', 'like', "%{$request->search}%");
+        });
+    }
+
+    if ($request->filled('date_from')) {
+        $query->whereDate('date_acquired', '>=', $request->date_from);
+    }
+    if ($request->filled('date_to')) {
+        $query->whereDate('date_acquired', '<=', $request->date_to);
+    }
+
+    if ($request->ppe_category === 'ppe') {
+        $query->where('amount', '>=', 50000);
+    } elseif ($request->ppe_category === 'semi_expendables') {
+        $query->where('amount', '<', 50000);
+    }
+
+    // ✅ Fix Pagination (Preserve Filters)
+    $serviceables = $query->paginate(20)->appends($request->query());
+
+    return view('user.user-gss.inventory', compact('serviceables'));
+}
+
+    
+
+
+
+
+public function exportInventory(Request $request)
+{
+    $user = Auth::user();
+    $query = Equipment::where('status', 'serviceable')
+        ->where('office', 'like', '%' . $user->office . '%')
+        ->where('division', 'like', '%' . $user->div_name . '%');
+
+    // ✅ Apply Filters
+    if ($request->filled('search')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('property_number', 'like', "%{$request->search}%")
+                ->orWhere('particular', 'like', "%{$request->search}%")
+                ->orWhere('description', 'like', "%{$request->search}%")
+                ->orWhere('end_user', 'like', "%{$request->search}%");
+        });
+    }
+
+    if ($request->filled('date_from')) {
+        $query->whereDate('date_acquired', '>=', $request->date_from);
+    }
+    if ($request->filled('date_to')) {
+        $query->whereDate('date_acquired', '<=', $request->date_to);
+    }
+
+    if ($request->ppe_category === 'ppe') {
+        $query->where('amount', '>=', 50000);
+    } elseif ($request->ppe_category === 'semi_expendables') {
+        $query->where('amount', '<', 50000);
+    }
+
+    // ✅ Get Filtered Data
+    $filteredData = $query->get();
+
+    if ($filteredData->isEmpty()) {
+        return redirect()->back()->with('error', 'No data available for export.');
+    }
+
+    return Excel::download(new ServiceableExport($filteredData), 'filtered_serviceable_inventory.xlsx');
+}
+
+
+    
+
+
+
+
+
 
     public function defectsAndComplaintsForm()
     {
@@ -76,84 +348,91 @@ class UserController extends Controller
         return view('user.user-gss.gate_pass_form');
     }
 
-    public function inventory()
-    {
-        $user = Auth::user();
-        $division = $user->div_name; // Fetch the division name of the logged-in user
+    
 
-        // Fetch serviceable items for the user's division
-        $serviceables = DB::table('equipment')
-            ->where('status', 'serviceable')
-            ->where('division', $division)
-            ->when(request()->get('search'), function ($query) {
-                $search = request()->get('search');
-                $query->where(function ($q) use ($search) {
-                    $q->where('property_number', 'like', "%$search%")
-                        ->orWhere('particular', 'like', "%$search%")
-                        ->orWhere('description', 'like', "%$search%");
-                });
-            })
-            ->paginate(20);
+      
 
-        return view('user.user-gss.inventory', compact('serviceables'));
-
-    }
-
-    public function viewRequest(Request $request)
+    public function viewRequest(Request $request) 
     {
         $user = Auth::user();
         $division = $user->div_name;
         $search = $request->get('search');
-
-        // Fetch data from unserviceable table
-        $unserviceable = DB::table('unserviceable')
-            ->select('id', 'property_number', 'item_description as description', 'status', DB::raw("'unserviceable' as source"))
-            ->where(function($query) use ($division, $search) {
-                $query->where('status', 'Pending')
-                    ->orWhereNull('status')
-                    ->orWhere('status', '');
-                if ($search) {
-                    $query->where('property_number', 'LIKE', "%$search%")
-                        ->orWhere('item_description', 'LIKE', "%$search%");
-                }
-            })
-            ->where('division', $division);
-
-        // Fetch data from job_requests table
-        $jobRequests = DB::table('job_requests')
-            ->select('id', 'name as property_number', 'job_description as description', 'status', DB::raw("'job_requests' as source"))
-            ->where(function($query) use ($division, $search) {
-                $query->where('status', 'Pending')
-                    ->orWhereNull('status')
-                    ->orWhere('status', '');
-                if ($search) {
-                    $query->where('name', 'LIKE', "%$search%")
-                        ->orWhere('job_description', 'LIKE', "%$search%");
-                }
-            })
-            ->where('division', $division);
-
-        // Fetch data from complaints_defects table
-        $complaintsDefects = DB::table('complaints_defects')
-            ->select('complaints_defects_id as id', 'property_number', 'complaints as description', 'status', DB::raw("'complaints_defects' as source"))
-            ->where(function($query) use ($division, $search) {
-                $query->where('status', 'Pending')
-                    ->orWhereNull('status')
-                    ->orWhere('status', '');
-                if ($search) {
-                    $query->where('property_number', 'LIKE', "%$search%")
-                        ->orWhere('complaints', 'LIKE', "%$search%");
-                }
-            })
-            ->where('division', $division);
-
-        // Union the queries together
-        $requests = $unserviceable->union($jobRequests)->union($complaintsDefects)->orderBy('id', 'desc')->paginate(20);
-        
-        
+    
+        // Common search filter (explicitly using table alias to avoid ambiguity)
+        $statusFilter = function ($query, $tableAlias) use ($search) {
+            $query->where(function ($q) use ($tableAlias) {
+                $q->where("$tableAlias.status", 'Pending')
+                  ->orWhereNull("$tableAlias.status")
+                  ->orWhere("$tableAlias.status", '');
+            });
+    
+            if ($search) {
+                $query->where(function ($q) use ($search, $tableAlias) {
+                    $q->where("$tableAlias.property_number", 'LIKE', "%$search%")
+                      ->orWhere("$tableAlias.description", 'LIKE', "%$search%");
+                });
+            }
+        };
+    
+        // Fetching data from request tables with explicit table alias for 'status'
+        $requestUpdate = DB::table('request_update as ru')
+            ->join('equipment as e', 'ru.property_number', '=', 'e.property_number')
+            ->select(
+                'e.equipment_id',
+                'ru.request_update_id as id', 
+                'ru.property_number', 
+                'ru.reasons as description', 
+                'e.description as equipment_description', 
+                'ru.status', 
+                DB::raw("'Request for Update' as source")
+            )
+            ->where('e.division', $division)
+            ->where(function ($query) use ($statusFilter) {
+                $statusFilter($query, 'ru'); // Apply filter
+            });
+    
+        $requestTransfer = DB::table('request_transfer as rt')
+            ->join('equipment as e', 'rt.property_number', '=', 'e.property_number')
+            ->select(
+                'e.equipment_id',
+                'rt.request_transfer_id as id', 
+                'rt.property_number', 
+                'rt.reason_transfer as description', 
+                'e.description as equipment_description', 
+                'rt.status', 
+                DB::raw("'Request for Transfer' as source")
+            )
+            ->where('e.division', $division)
+            ->where(function ($query) use ($statusFilter) {
+                $statusFilter($query, 'rt'); // Apply filter
+            });
+    
+        $requestUnserviceable = DB::table('request_unserviceable as ru')
+            ->join('equipment as e', 'ru.property_number', '=', 'e.property_number')
+            ->select(
+                'e.equipment_id',
+                'ru.request_unserviceable_id as id', 
+                'ru.property_number', 
+                'ru.unserviceable_condition as description', 
+                'e.description as equipment_description', 
+                'ru.status', 
+                DB::raw("'Request for Return' as source")
+            )
+            ->where('e.division', $division)
+            ->where(function ($query) use ($statusFilter) {
+                $statusFilter($query, 'ru'); // Apply filter
+            });
+    
+        // Combine all requests (excluding job_requests and complaints_defects)
+        $requests = $requestUpdate
+            ->union($requestTransfer)
+            ->union($requestUnserviceable)
+            ->orderBy('source', 'desc')
+            ->paginate(20);
+    
         return view('user.user-gss.view_request', compact('requests'));
     }
-
+    
     public function getEquipmentDetails(Request $request)
     {
         $propertyNumber = $request->input('property_number');

@@ -14,6 +14,7 @@ class ProcurementAdminController extends Controller
         $username = $user->username;
 
         //return view('procurement.admin.dashboard', compact('user'));
-        return redirect()->to('http://localhost:8080/admin?username='.$username);
+        return redirect()->away('http://ams.psts/admin?username='.$username);
+
     }
 }

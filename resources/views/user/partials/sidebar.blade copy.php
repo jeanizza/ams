@@ -71,17 +71,75 @@
 
                 <!-- Procurement Services (Main Menu) -->
                 <li class="nav-item {{ request()->is('user/procurement*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('user/procurement*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-shopping-cart"></i>
+                        <p>
+                            Procurement Services
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
 
-                @php
-                    $username = auth()->check() ? auth()->user()->username : 'guest';
-                @endphp
+                    <!-- Submenu: CodeIgniter List, Logbook, Services -->
+                    <ul class="nav nav-treeview">
+                        <!-- Lists for PRs and POs -->
+                        <li class="nav-item">
+                            <a href="{{ url('http://localhost/ams_psts/user/pr') }}" class="nav-link">
+                                <i class="nav-icon fas fa-file"></i>
+                                <p>Purchase Requests</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('http://localhost/ams_psts/user/po') }}" class="nav-link">
+                                <i class="nav-icon fas fa-clipboard"></i>
+                                <p>Purchase Orders</p>
+                            </a>
+                        </li>
 
-                <a href="http://ams.psts/user?username={{ urlencode($username) }}" class="nav-link">
-                    <i class="nav-icon fas fa-shopping-cart"></i>
-                    <p>Procurement Services</p>
-                </a>
+                        <!-- Logbook -->
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-book"></i>
+                                <p>Logbook<i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ url('/user/receiving') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-arrow-right"></i>
+                                        <p>Receiving</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url('/user/releasing') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-arrow-left"></i>
+                                        <p>Releasing</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Procurement Services -->
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-cog"></i>
+                                <p>Services<i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ url('/user/ppmp') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-folder"></i>
+                                        <p>PPMP</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url('/user/suppliers') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-store"></i>
+                                        <p>Suppliers</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
                 </li>
-
             </ul>
         </nav>
     </div>

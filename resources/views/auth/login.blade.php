@@ -15,9 +15,9 @@
                 <!-- <div class="text-wrap p-4 p-lg-5 text-center align-items-center order-md-last hidden"> -->
                     <div class="text w-100">
                         <h2>Welcome to DENR 10</h2>
-                        <div class="title-container"><h1>Asset Management System</h1></div>
-                        <!-- <p>Don't have an account?</p>
-                        <a href="/register" class="btn btn-white btn-outline-white">Sign Up</a> -->
+                        <div class="title-container"><h1>Regional Asset Management System</h1></div>
+                        <h4>Automated Integrated Reconciled</h4>
+                       <!--  <a href="/register" class="btn btn-white btn-outline-white">Sign Up</a> -->
                     </div>
 
                 </div>

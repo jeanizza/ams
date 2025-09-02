@@ -29,14 +29,6 @@
                                 <label>Search</label>
                                 <input type="text" id="searchInput" class="form-control" placeholder="Search by Property Number, Particular">
                             </div>
-                            <div class="col-md-3">
-                                <label>Equipment Type</label>
-                                <select id="equipmentType" class="form-control">
-                                    <option value="all">All</option>
-                                    <option value="PPE">PPE (≥50,000)</option>
-                                    <option value="Semi-Expendables">Semi-Expendables (<50,000)</option>
-                                </select>
-                            </div>
                             <div class="col-md-2">
                                 <label>From</label>
                                 <input type="date" id="fromDate" class="form-control">
@@ -77,7 +69,7 @@
                                         <td>{{ $record['unserviceable_id'] }}</td>
                                         <td>{{ $record['property_number'] }}</td>
                                         <td>{{ $record['particular'] }}</td>
-                                        <td class="amount">{{ number_format((float) str_replace(',', '', $record['amount']), 2) }}</td>
+                                        <td class="amount">{{ number_format((float) $record['amount'], 2, '.', ',') }}</td>
                                         <td>{{ $record['lifespan'] }}</td>
                                         <td>{{ \Carbon\Carbon::parse($record['date_acquired'])->format('Y-m-d') }}</td>
                                         <td>{{ \Carbon\Carbon::parse($record['date_end'])->format('Y-m-d') }}</td>
@@ -140,20 +132,13 @@
   </div>
 </div>
 
-
-
-<!-- JavaScript -->
-
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     let searchInput = document.getElementById("searchInput");
-    let equipmentTypeDropdown = document.getElementById("equipmentType");
     let fromDateInput = document.getElementById("fromDate");
     let toDateInput = document.getElementById("toDate");
     let disposalForm = document.getElementById("disposalForm");
@@ -175,14 +160,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // ✅ Function to fetch and display filtered data dynamically
     function fetchFilteredData() {
         let searchValue = searchInput.value.trim();
-        let selectedType = equipmentTypeDropdown.value;
         let fromDate = fromDateInput.value;
         let toDate = toDateInput.value;
 
         let url = "{{ route('gss.admin.add_disposal_value') }}";
         let params = new URLSearchParams({
             search: searchValue,
-            equipment_type: selectedType,
             from_date: fromDate,
             to_date: toDate
         });
@@ -209,7 +192,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <td>${record.unserviceable_id}</td>
                         <td>${record.property_number || "N/A"}</td>
                         <td>${record.particular || "N/A"}</td>
-                        <td class="amount">${record.amount ? parseFloat(record.amount).toLocaleString() : "0.00"}</td>
+                        <td>${record.amount ? parseFloat(record.amount).toLocaleString(undefined, { minimumFractionDigits: 2 }) : "0.00"}</td>
                         <td>${record.lifespan || "N/A"}</td>
                         <td>${record.date_acquired || "N/A"}</td>
                         <td>${record.date_end || "N/A"}</td>
@@ -238,7 +221,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ✅ Attach event listeners for real-time filtering
     searchInput.addEventListener("keyup", debouncedFetch);
-    equipmentTypeDropdown.addEventListener("change", debouncedFetch);
     fromDateInput.addEventListener("change", debouncedFetch);
     toDateInput.addEventListener("change", debouncedFetch);
 
@@ -312,7 +294,6 @@ document.addEventListener("DOMContentLoaded", function () {
     resetButton.addEventListener("click", function (event) {
         event.preventDefault();
         document.getElementById("searchInput").value = "";
-        document.getElementById("equipmentType").value = "all";
         document.getElementById("fromDate").value = "";
         document.getElementById("toDate").value = "";
         fetchFilteredData();
@@ -326,8 +307,16 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(button => {
+        button.addEventListener("click", function () {
+            warningModal.hide();
+            successModal.hide();
+        });
+    });
+
 });
 </script>
 
 
 @endsection
+

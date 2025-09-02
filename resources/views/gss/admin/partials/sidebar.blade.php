@@ -15,6 +15,17 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                <a href="{{ route('gss.admin.notification') }}" class="nav-link">
+                    <i class="nav-icon fas fa-bell"></i>
+                    <p>
+                        Notifications 
+                        @if(isset($totalPendingRequests) && $totalPendingRequests > 0)
+                            <span class="badge badge-danger">{{ $totalPendingRequests }}</span>
+                        @endif
+                    </p>
+                </a>
+            </li>
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-clipboard-list"></i>
@@ -71,6 +82,13 @@
                                 <p>Reconcile Items</p>
                             </a>
                         </li>
+                <!--        <li class="nav-item">
+                            <a href="{{ route('gss.admin.add_disposal_value') }}" class="nav-link">
+                                <i class="fas fa-hand-holding-usd nav-icon"></i>
+                                <p>Add Disposal Value</p>
+                            </a>
+                        </li> -->
+
                         <li class="nav-item">
                             <a href="{{ route('gss.admin.add_disposal_value') }}" class="nav-link">
                                 <i class="fas fa-hand-holding-usd nav-icon"></i>

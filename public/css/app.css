@@ -384,3 +384,7 @@ span.brand-text.font-weight-light {
 #statistics .col-md-6.col-lg-3, .small-box {
     margin: 0 5px;
 }
+
+.btn-group-vertical a {
+    margin-bottom: 8px; /* Adjust spacing between buttons */
+}

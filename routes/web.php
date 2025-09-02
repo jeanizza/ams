@@ -14,6 +14,7 @@ use App\Http\Controllers\GssUserController;
 use App\Http\Controllers\AccountingSectionController;
 use App\Http\Controllers\AccountingUserController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\Auth\LoginController; //added for PSTS Logout
 
 Auth::routes();
 
@@ -36,6 +37,14 @@ Route::middleware(['auth', CheckRole::class . ':admin', PreventBackHistory::clas
 Route::middleware(['auth', CheckRole::class . ':user', PreventBackHistory::class])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
 
+    Route::get('/transfer/{id}', [UserController::class, 'requestTransfer'])->name('requests.request_transfer');
+    Route::get('/update/{id}', [UserController::class, 'requestUpdate'])->name('requests.request_update');
+    Route::get('/unserviceable/{id}', [UserController::class, 'requestUnserviceable'])->name('requests.request_unserviceable');
+
+    Route::post('/transfer/{id}', [UserController::class, 'storeTransferRequest'])->name('requests.store_transfer');
+    Route::post('/update/{id}', [UserController::class, 'storeUpdateRequest'])->name('requests.store_update');
+    Route::post('/unserviceable/{id}', [UserController::class, 'storeUnserviceableRequest'])->name('requests.store_unserviceable');
+
     // General Services routes under UserController
     Route::get('/user/general-services/defects-and-complaints-form/{id?}', [UserController::class, 'defectsAndComplaintsForm'])->name('user.general-services.defects_and_complaints_form');
 
@@ -49,6 +58,12 @@ Route::middleware(['auth', CheckRole::class . ':user', PreventBackHistory::class
     Route::post('/user/general-services/gate-pass-form', [UserController::class, 'storeGatePassForm'])->name('user.general-services.store_gate_pass_form');
 
     Route::get('/user/general-services/inventory', [UserController::class, 'inventory'])->name('user.general-services.inventory');
+    Route::get('/user/general-services/inventory/export', [UserController::class, 'exportInventory'])->name('user.general-services.inventory.export');
+    Route::get('/export-inventory', [EquipmentController::class, 'exportInventory'])->name('export.inventory');
+
+
+
+
     Route::get('/user/general-services/view_request', [UserController::class, 'viewRequest'])->name('user.general-services.view_request');
 
     // Route to get equipment details
@@ -71,6 +86,11 @@ Route::middleware(['auth', PreventBackHistory::class, CheckRoleAndOffice::class 
 // Routes for General Services Admin
 Route::middleware(['auth', PreventBackHistory::class, CheckRoleAndOffice::class . ':admin,Administrative Division,General Services Section'])->group(function () {
     Route::get('/gss/admin/dashboard', [GssAdminController::class, 'index'])->name('gss.admin.dashboard');
+   // Route::get('/gss/admin/download-excel', [GssAdminController::class, 'downloadExcel'])->name('gss.admin.downloadExcel');
+   Route::get('/gss/admin/fetch-displayed-equipment', [GssAdminController::class, 'fetchDisplayedEquipment'])->name('gss.admin.fetchDisplayedEquipment');
+
+
+    Route::get('/gss/admin/notifications', [GssAdminController::class, 'adminNotification'])->name('gss.admin.notification');
 
     // Serviceable routes with sub-menu
     Route::prefix('gss/admin/serviceable')->group(function () {
@@ -160,3 +180,8 @@ Route::get('/get-sections/{div_id}', [App\Http\Controllers\Auth\RegisterControll
 
 Route::get('register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('register', [App\Http\Controllers\Auth\RegisterController::class, 'register'])->name('register.post');
+
+// Allow a GET request to hit the same logout() method //added for PSTS Logout
+Route::get('/logout', [LoginController::class, 'logout'])
+     ->middleware('auth')
+     ->name('logout.get');

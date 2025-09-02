@@ -18,6 +18,7 @@ use App\Models\MaintenanceLedger;
 use App\Models\LedgerDetail;
 
 use App\Exports\DisposalDetailsExport;
+use App\Exports\EquipmentExport;
 
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -66,6 +67,110 @@ class GssAdminController extends Controller
         return view('gss.admin.dashboard', compact('user', 'equipmentItems', 'divisions'));
     }
 
+    public function fetchDisplayedEquipment(Request $request)
+    {
+        $user = Auth::user();
+        $office = $user->office;
+        $dateTo = Carbon::now()->addDays(5);
+        $division = $request->input('division', '');
+
+        // Apply the same filters as in the table view
+        $query = Equipment::where('office', 'like', '%' . $office . '%')
+            ->where('date_end', '<=', $dateTo)
+            ->where('status', 'serviceable');
+
+        if ($division) {
+            $query->where('division', $division);
+        }
+
+        // Fetch ALL matching records (no pagination)
+        $equipmentItems = $query->select([
+            'property_number', 'particular', 'description', 'amount', 'division',
+            'section', 'date_acquired', 'lifespan', 'date_end'
+        ])->get();
+
+        return response()->json($equipmentItems);
+    }
+
+
+    public function adminNotification(Request $request)
+    {
+        $user = Auth::user(); 
+        $office = $user->office;
+
+        $divisions = DB::table('equipment')
+            ->where('office', $office)
+            ->pluck('division')
+            ->unique();
+
+        $query = DB::table('request_update')
+            ->select(
+                'request_update.property_number',
+                'request_update.reasons as reason',
+                DB::raw("'Request for Update' as source_table"),
+                'equipment.equipment_id as equipment_id',
+                'equipment.particular',
+                'equipment.description',
+                'equipment.amount',
+                'equipment.division'
+            )
+            ->join('equipment', 'request_update.property_number', '=', 'equipment.property_number')
+            ->where('equipment.office', $office)
+            ->where('request_update.status', 'Pending')
+
+            ->union(
+                DB::table('request_transfer')
+                    ->select(
+                        'request_transfer.property_number',
+                        'request_transfer.reason_transfer as reason',
+                        DB::raw("'For Transfer' as source_table"),
+                        'equipment.equipment_id as equipment_id',
+                        'equipment.particular',
+                        'equipment.description',
+                        'equipment.amount',
+                        'equipment.division'
+                    )
+                    ->join('equipment', 'request_transfer.property_number', '=', 'equipment.property_number')
+                    ->where('equipment.office', $office)
+                    ->where('request_transfer.status', 'Pending')
+            )
+
+            ->union(
+                DB::table('request_unserviceable')
+                    ->select(
+                        'request_unserviceable.property_number',
+                        'request_unserviceable.unserviceable_condition as reason',
+                        DB::raw("'Unserviceable' as source_table"),
+                        'equipment.equipment_id as equipment_id',
+                        'equipment.particular',
+                        'equipment.description',
+                        'equipment.amount',
+                        'equipment.division'
+                    )
+                    ->join('equipment', 'request_unserviceable.property_number', '=', 'equipment.property_number')
+                    ->where('equipment.office', $office)
+                    ->where('request_unserviceable.status', 'Pending')
+            );
+
+        // Optional filters
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('property_number', 'LIKE', '%' . $request->search . '%');
+        }
+
+        if ($request->has('division') && !empty($request->division)) {
+            $query->where('equipment.division', $request->division);
+        }
+
+        if ($request->has('from') && $request->has('to') && !empty($request->from) && !empty($request->to)) {
+            $query->whereBetween('request_update.date_created', [$request->from, $request->to]);
+        }
+
+        $notifications = $query->paginate(20);
+
+        return view('gss.admin.notification', compact('notifications', 'divisions'));
+    }
+
+
     // Add Record
     public function add_record()
     {
@@ -87,7 +192,8 @@ class GssAdminController extends Controller
 
     public function getSections($div_name)
     {
-        $division = Division::where('div_name', $div_name)->first();
+        $division = Division::whereRaw("BINARY UPPER(div_name) = ?", [strtoupper($div_name)])->first();
+
         if ($division) {
             $sections = Section::where('div_id', $division->div_id)->pluck('sec_name');
             return response()->json($sections);
@@ -287,7 +393,7 @@ class GssAdminController extends Controller
         $divisions = Division::all();
 
         // Fetch the division details for the current item
-        $division = Division::where('div_name', $serviceable->division)->first();
+        $division = Division::where('div_name', trim($serviceable->division))->first();
 
         // Fetch sections based on the division
         $sections = $division ? Section::where('div_id', $division->div_id)->get() : [];
@@ -295,7 +401,7 @@ class GssAdminController extends Controller
         return compact('serviceable', 'divisions', 'sections');
     }
 
-    public function updateServiceableForm($id)
+    public function updateServiceableForm($id) 
     {
         $data = $this->fetchServiceableData($id);
         if (!$data) {
@@ -415,7 +521,7 @@ class GssAdminController extends Controller
         return redirect()->back()->with('error', 'Serviceable item not found.');
     }
 
-    // Validate incoming data
+    // Validate incoming data 
     $validatedData = $request->validate([
         'property_number' => 'required|string|max:100',
         'end_user' => 'required|string|max:100',
@@ -1360,5 +1466,43 @@ public function storeDisposalValue(Request $request)
     {
         return Excel::download(new DisposalDetailsExport($request), 'Disposal_Details.xlsx');
     }
+
+    public function downloadExcel(Request $request)
+    {
+        $division = $request->input('division');
+
+        // Fetch the same filtered data as in the displayed table
+        $query = Equipment::whereRaw('DATE_ADD(date_acquired, INTERVAL lifespan YEAR) <= CURDATE()');
+
+        if (!empty($division)) {
+            $query->where('division', $division);
+        }
+
+        // Get the same paginated records but without pagination
+        $equipmentItems = $query->get();
+
+        return Excel::download(new EquipmentExport($equipmentItems), 'filtered_equipment.xlsx');
+    }
+
+    public function fetchAllEquipment(Request $request)
+    {
+        $division = $request->input('division');
+
+        // Fetch all equipment items based on filters
+        $query = Equipment::query();
+
+        if (!empty($division)) {
+            $query->where('division', $division);
+        }
+
+        // Select only the required columns, excluding Image & Actions
+        $equipmentItems = $query->select([
+            'property_number', 'particular', 'description', 'division',
+            'section', 'date_acquired', 'lifespan', 'date_end'
+        ])->get();
+
+        return response()->json($equipmentItems);
+    }
+
     
 }

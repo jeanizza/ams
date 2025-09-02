@@ -526,4 +526,4 @@ $(document).ready(function() {
     @endif
 });
 </script>
-@endsection
+@endsection 

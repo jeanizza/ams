@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name', 'DENR-10'))</title>
+
+    <meta name="inventory-route" content="{{ route('user.general-services.inventory') }}">
+
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/adminlte.min.css') }}">
@@ -19,6 +22,7 @@
             margin-right: 20px;
         }
     </style>
+    @yield('styles')
 </head>
 <body class="hold-transition sidebar-mini gss-admin">
     <div id="app" class="wrapper">
@@ -60,5 +64,6 @@
     <script src="{{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset('js/adminlte.min.js') }}"></script>
+     @yield('scripts')
 </body>
 </html>

@@ -95,12 +95,6 @@
                                 <p>Add Carrying Value</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('finance.disposal_details') }}" class="nav-link">
-                                <i class="fas fa-file-alt nav-icon"></i>
-                                <p>Disposal Details</p>
-                            </a>
-                        </li>
                     </ul>
                 </li>
             </ul>

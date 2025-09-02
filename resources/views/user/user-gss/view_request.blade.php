@@ -21,16 +21,16 @@
                         </div>
                     </form>
 
-                    <!-- Display the requests -->
                     @if($requests->isEmpty())
                         <p>No pending requests found.</p>
                     @else
                         <table class="table table-bordered" id="serviceable-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>No</th>
                                     <th>Property Number</th>
                                     <th>Description</th>
+                                    <th>Equipment Description</th>
                                     <th>Status</th>
                                     <th>Source</th>
                                     <th>Actions</th>
@@ -39,19 +39,31 @@
                             <tbody>
                                 @foreach($requests as $request)
                                     <tr>
-                                        <td>{{ $request->id }}</td>
+                                        <td>{{ $requests->firstItem() + $loop->index }}</td>
                                         <td>{{ $request->property_number }}</td>
                                         <td>{{ $request->description }}</td>
+                                        <td>{{ $request->equipment_description ?? 'N/A' }}</td>
                                         <td>{{ $request->status ?? 'Pending' }}</td>
-                                        <td>{{ ucfirst($request->source) }}</td>
                                         <td>
-                                            <!-- Edit Button -->
-                                            @if($request->source == 'complaints_defects')
-                                                <a href="{{ route('user.general-services.defects_and_complaints_form', ['id' => $request->id]) }}" class="btn btn-warning btn-sm">Edit</a>
-                                            @elseif($request->source == 'job_requests')
-                                                <a href="{{ route('user.general-services.job_request_form', ['id' => $request->id]) }}" class="btn btn-warning btn-sm">Edit</a>
-                                            @elseif($request->source == 'unserviceable')
-                                                <a href="{{ route('user.general-services.returned_unserviceable_form', ['id' => $request->id]) }}" class="btn btn-warning btn-sm">Edit</a>
+                                            @switch($request->source)
+                                                @case('Request for Transfer')
+                                                    Request for Transfer
+                                                    @break
+                                                @case('Request for Update')
+                                                    Request for Update
+                                                    @break
+                                                @case('Request for Return')
+                                                    Request for Return
+                                                    @break
+                                                @default
+                                                    {{ ucfirst($request->source) }}
+                                            @endswitch
+                                        </td>
+                                        <td>
+                                            @if(in_array($request->source, ['Request for Update', 'Request for Transfer', 'Request for Return']))
+                                                <a href="{{ route('requests.request_update', $request->equipment_id) }}" class="btn btn-success btn-sm">Update</a>
+                                                <a href="{{ route('requests.request_transfer', $request->equipment_id) }}" class="btn btn-warning btn-sm">Transfer</a>
+                                                <a href="{{ route('requests.request_unserviceable', $request->equipment_id) }}" class="btn btn-danger btn-sm">Unserviceable</a>
                                             @endif
                                         </td>
                                     </tr>
@@ -59,7 +71,6 @@
                             </tbody>
                         </table>
 
-                        <!-- Pagination Links -->
                         <div class="d-flex justify-content-between">
                             {{ $requests->appends(request()->only('search'))->links('pagination::bootstrap-4') }}
                         </div>
@@ -71,6 +82,7 @@
     </div>
 </div>
 @endsection
+
 
 @section('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
